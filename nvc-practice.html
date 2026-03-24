@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVC Practice - Subtext</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="nvc-practice.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 140'><text y='50%' x='50%' dominant-baseline='middle' text-anchor='middle' font-size='120'>🦒</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-main">
+                    <h1 class="title">Subtext</h1>
+                    <p class="subtitle">Understand what's beneath your words</p>
+                </div>
+                <nav class="nav-links">
+                    <a href="index.html" class="nav-link">← Main Analyzer</a>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+
+            <!-- Chat Interface Section -->
+            <section class="panel chat-panel">
+                <h2>💬 NVC Coaching Chat</h2>
+                <div id="chatContainer" class="chat-container"></div>
+                <div id="typingIndicator" class="typing-indicator" style="display:none;">Typing...</div>
+                <div class="chat-input-area">
+                    <textarea id="chatInput" class="textarea practice-textarea" placeholder="Type your message to the NVC coach..." rows="3"></textarea>
+                    <button id="sendBtn" class="btn btn-primary">Send</button>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="panel results-panel" id="resultsPanel" style="display: none;">
+                <div class="results-header">
+                    <h2>🌟 NVC Breakdown</h2>
+                    <button id="clearResultsBtn" class="btn btn-secondary btn-small">
+                        <span class="icon">↻</span> Clear
+                    </button>
+                </div>
+
+                <div class="nvc-framework">
+                    <!-- Observation -->
+                    <div class="nvc-item">
+                        <div class="nvc-header">
+                            <h3>👁️ Observation</h3>
+                            <button class="explanation-btn" data-component="observation" title="Learn about Observation">
+                                <span class="info-icon">ℹ️</span>
+                            </button>
+                        </div>
+                        <div class="nvc-content" id="nvcObservation" contenteditable="true" data-field="observation" class="editable-field">
+                            (waiting for analysis...)
+                        </div>
+                        <small class="edit-hint">✏️ Click to edit</small>
+                        <div class="nvc-explanation">
+                            <em>Fact-based description of what you or others did, without judgment or interpretation.</em>
+                        </div>
+                    </div>
+
+                    <!-- Feeling -->
+                    <div class="nvc-item">
+                        <div class="nvc-header">
+                            <h3>❤️ Feeling</h3>
+                            <button class="explanation-btn" data-component="feeling" title="Learn about Feelings">
+                                <span class="info-icon">ℹ️</span>
+                            </button>
+                        </div>
+                        <div class="nvc-content" id="nvcFeeling" contenteditable="true" data-field="feeling" class="editable-field">
+                            (waiting for analysis...)
+                        </div>
+                        <small class="edit-hint">✏️ Click to edit or add an emotion</small>
+                        <div class="nvc-explanation">
+                            <em>How you felt in response to the observation. Core emotions without blame.</em>
+                        </div>
+                    </div>
+
+                    <!-- Need -->
+                    <div class="nvc-item">
+                        <div class="nvc-header">
+                            <h3>🎯 Need</h3>
+                            <button class="explanation-btn" data-component="need" title="Learn about Needs">
+                                <span class="info-icon">ℹ️</span>
+                            </button>
+                        </div>
+                        <div class="nvc-content" id="nvcNeed" contenteditable="true" data-field="need" class="editable-field">
+                            (waiting for analysis...)
+                        </div>
+                        <small class="edit-hint">✏️ Click to edit or add a need</small>
+                        <div class="nvc-explanation">
+                            <em>The underlying universal human need behind your feeling.</em>
+                        </div>
+                    </div>
+
+                    <!-- Request -->
+                    <div class="nvc-item">
+                        <div class="nvc-header">
+                            <h3>📝 Request</h3>
+                            <button class="explanation-btn" data-component="request" title="Learn about Requests">
+                                <span class="info-icon">ℹ️</span>
+                            </button>
+                        </div>
+                        <div class="nvc-content" id="nvcRequest" contenteditable="true" data-field="request" class="editable-field">
+                            (waiting for analysis...)
+                        </div>
+                        <small class="edit-hint">✏️ Click to edit or add a request</small>
+                        <div class="nvc-explanation">
+                            <em>A specific, concrete action you'd like to request to meet the need.</em>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Copy & Export Section -->
+                <div class="export-section">
+                    <button id="copyBtn" class="btn btn-secondary">
+                        <span class="icon">📋</span> Copy NVC Breakdown
+                    </button>
+                    <button id="downloadBtn" class="btn btn-secondary">
+                        <span class="icon">⬇️</span> Download as Text
+                    </button>
+                </div>
+            </section>
+
+            <!-- Tips Section -->
+            <section class="panel tips-panel">
+                <h2>💡 NVC Tips</h2>
+                <div class="tips-grid">
+                    <div class="tip-item">
+                        <h4>🎯 Observation</h4>
+                        <p>Describe only what happened without judgment. Ask: "What did I see, hear, or experience?"</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4>❤️ Feeling</h4>
+                        <p>Name the emotion that arose. Start with "I felt..." Use genuine emotion words, not judgments.</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4>🎯 Need</h4>
+                        <p>Discover what matters to you. Every feeling points to an unmet need. What do you need?</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4>📝 Request</h4>
+                        <p>Ask positively and specifically for action. Use "Would you be willing to..." not demands.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>💜 Practice Nonviolent Communication to foster understanding and connection</p>
+        </footer>
+    </div>
+
+    <!-- Explanation Modal -->
+    <div id="explanationModal" class="modal" style="display:none;">
+        <div class="modal-content explanation-modal">
+            <button class="modal-close" id="closeExplanation">×</button>
+            <div id="explanationContent">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Alert -->
+    <div id="errorAlert" class="alert alert-error" style="display: none;">
+        <span id="errorMessage"></span>
+        <button class="alert-close" onclick="document.getElementById('errorAlert').style.display='none';">×</button>
+    </div>
+
+    <!-- Success Alert -->
+    <div id="successAlert" class="alert alert-success" style="display: none;">
+        <span id="successMessage"></span>
+        <button class="alert-close" onclick="document.getElementById('successAlert').style.display='none';">×</button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="nvc.js"></script>
+    <script src="nvc-practice.js"></script>
+</body>
+</html>

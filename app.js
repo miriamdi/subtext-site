@@ -14,8 +14,15 @@ class SubtextApp {
         this.translationResult = null;
         this.analyzedText = null; // Text used for analysis (translated if needed)
 
+        // NVC interpreter UI state
+        this.nvcPanelOpen = false;
+
         // Initialize the processing pipeline
         this.pipeline = new SubtextPipeline();
+
+        // State for interactive reference guide
+        this.activeNvcField = null; // 'feeling' or 'need'
+        this.fieldHasFocused = { feeling: false, need: false }; // Track first focus
 
         this.initializeElements();
         this.attachEventListeners();
@@ -66,6 +73,7 @@ class SubtextApp {
         this.nvcFeeling = document.getElementById('nvcFeeling');
         this.nvcNeed = document.getElementById('nvcNeed');
         this.nvcRequest = document.getElementById('nvcRequest');
+        this.toggleNvcBtn = document.getElementById('toggleNvcBtn');
 
         // Clear button
         this.clearSection = document.getElementById('clearSection');
@@ -81,18 +89,49 @@ class SubtextApp {
         this.analyzeBtn.addEventListener('click', () => this.analyzeEmotion());
         this.clearBtn.addEventListener('click', () => this.resetApp());
 
+        if (this.toggleNvcBtn) {
+            this.toggleNvcBtn.addEventListener('click', () => this.toggleNvcInterpreter());
+        }
+
         // Attach listeners to editable NVC fields
         this.nvcObservation.addEventListener('blur', (e) => this.handleNVCFieldEdit(e));
         this.nvcFeeling.addEventListener('blur', (e) => this.handleNVCFieldEdit(e));
         this.nvcNeed.addEventListener('blur', (e) => this.handleNVCFieldEdit(e));
+        this.nvcRequest.addEventListener('blur', (e) => this.handleNVCFieldEdit(e));
 
         // Also handle immediate updates while typing (optional)
         this.nvcObservation.addEventListener('input', (e) => this.handleNVCFieldInput(e));
         this.nvcFeeling.addEventListener('input', (e) => this.handleNVCFieldInput(e));
         this.nvcNeed.addEventListener('input', (e) => this.handleNVCFieldInput(e));
+        this.nvcRequest.addEventListener('input', (e) => this.handleNVCFieldInput(e));
+
+        // Add focus listeners for interactive reference guide
+        this.nvcFeeling.addEventListener('focus', () => this.handleNVCFieldFocus('feeling'));
+        this.nvcNeed.addEventListener('focus', () => this.handleNVCFieldFocus('need'));
+
+        // Track field blur to clear active field, unless reference modal is open
+        this.nvcFeeling.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (!this.referenceModal || this.referenceModal.style.display === 'none') {
+                    if (this.activeNvcField === 'feeling') {
+                        this.activeNvcField = null;
+                    }
+                }
+            }, 150);
+        });
+        this.nvcNeed.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (!this.referenceModal || this.referenceModal.style.display === 'none') {
+                    if (this.activeNvcField === 'need') {
+                        this.activeNvcField = null;
+                    }
+                }
+            }, 150);
+        });
 
         // Initialize explanation and reference features
         this.initializeExplanationFeatures();
+        this.initializeInteractiveReferenceGuide();
     }
 
     /**
@@ -353,9 +392,57 @@ class SubtextApp {
         this.nvcNeed.textContent = nvc.need;
         this.nvcRequest.textContent = nvc.request;
 
-        this.resultsPanel.style.display = 'block';
+        // Update visual hints for fields with fallback messages
+        this.updateNVCFieldHints();
 
-        console.log('NVC Generated:', nvc);
+        // Set up toggle control for NVC interpreter UI
+        if (this.toggleNvcBtn) {
+            this.toggleNvcBtn.style.display = 'inline-flex';
+            this.toggleNvcBtn.textContent = this.nvcPanelOpen ? '🦒 Close NVC Interpreter' : '🦒 Open NVC Interpreter';
+        }
+
+        // Show/hide NVC panel based on user choice
+        this.resultsPanel.style.display = this.nvcPanelOpen ? 'block' : 'none';
+
+        console.log('NVC Generated:', nvc, 'NVC panel open:', this.nvcPanelOpen);
+    }
+
+    /**
+     * Toggle NVC interpreter panel open/closed
+     */
+    toggleNvcInterpreter() {
+        this.nvcPanelOpen = !this.nvcPanelOpen;
+
+        if (this.nvcPanelOpen) {
+            this.resultsPanel.style.display = 'block';
+            this.toggleNvcBtn.textContent = '🦒 Close NVC Interpreter';
+        } else {
+            this.resultsPanel.style.display = 'none';
+            this.toggleNvcBtn.textContent = '🦒 Open NVC Interpreter';
+        }
+
+        // Keep emotion panel visible always by default
+        this.emotionPanel.style.display = 'block';
+    }
+
+    /**
+     * Update visual hints for fields with "No clear X" messages
+     */
+    updateNVCFieldHints() {
+        const fields = [
+            { element: this.nvcObservation, fallback: 'No clear observation' },
+            { element: this.nvcFeeling, fallback: 'No clear feeling' },
+            { element: this.nvcNeed, fallback: 'No clear need' },
+            { element: this.nvcRequest, fallback: 'No clear request' }
+        ];
+
+        fields.forEach(({ element, fallback }) => {
+            if (element.textContent.trim() === fallback) {
+                element.classList.add('field-placeholder');
+            } else {
+                element.classList.remove('field-placeholder');
+            }
+        });
     }
 
     /**
@@ -389,6 +476,17 @@ class SubtextApp {
     }
 
     /**
+     * User edits request - manual edit, doesn't trigger auto-updates
+     */
+    editNVCRequest(newRequest) {
+        console.log('[App] User editing request:', newRequest);
+        if (this.nvcResult) {
+            this.nvcResult.request = newRequest;
+            this.displayNVCResults();
+        }
+    }
+
+    /**
      * Handle NVC field blur event - calls appropriate edit method
      */
     handleNVCFieldEdit(event) {
@@ -405,6 +503,8 @@ class SubtextApp {
             this.editNVCFeeling(newValue);
         } else if (field === 'need') {
             this.editNVCNeed(newValue);
+        } else if (field === 'request') {
+            this.editNVCRequest(newValue);
         }
     }
 
@@ -433,6 +533,8 @@ class SubtextApp {
             this.editNVCFeeling(newValue);
         } else if (field === 'need') {
             this.editNVCNeed(newValue);
+        } else if (field === 'request') {
+            this.editNVCRequest(newValue);
         }
     }
 
@@ -466,6 +568,12 @@ class SubtextApp {
         this.nvcResult = null;
         this.translationResult = null;
         this.analyzedText = null;
+        this.nvcPanelOpen = false;
+
+        if (this.toggleNvcBtn) {
+            this.toggleNvcBtn.style.display = 'none';
+            this.toggleNvcBtn.textContent = '🦒 Open NVC Interpreter';
+        }
 
         // Reset pipeline
         this.pipeline.reset();
@@ -617,6 +725,7 @@ class SubtextApp {
     closeReference() {
         this.referenceModal.style.display = 'none';
         document.body.style.overflow = '';
+        this.activeNvcField = null;
     }
 
     /**
@@ -664,7 +773,7 @@ class SubtextApp {
                     <div class="category-content">
                         <div class="entry-list">
                             ${categoryData.feelings.map(feeling => `
-                                <div class="entry-item">
+                                <div class="entry-item" data-type="feeling" data-value="${feeling.word}" data-selectable="true">
                                     <div class="entry-word">${feeling.word}</div>
                                     <div class="entry-definition">${feeling.definition}</div>
                                 </div>
@@ -676,6 +785,7 @@ class SubtextApp {
         }
 
         container.innerHTML = html;
+        this.initializeInteractiveReferenceGuide();
     }
 
     /**
@@ -701,7 +811,7 @@ class SubtextApp {
                     <div class="category-content">
                         <div class="entry-list">
                             ${categoryData.needs.map(need => `
-                                <div class="entry-item">
+                                <div class="entry-item" data-type="need" data-value="${need.name}" data-selectable="true">
                                     <div class="entry-word">${need.name}</div>
                                     <div class="entry-definition">${need.definition}</div>
                                 </div>
@@ -713,6 +823,7 @@ class SubtextApp {
         }
 
         container.innerHTML = html;
+        this.initializeInteractiveReferenceGuide();
     }
 
     /**
@@ -742,7 +853,7 @@ class SubtextApp {
                     <div class="category-content">
                         <div class="entry-list">
                             ${result.feelings.map(feeling => `
-                                <div class="entry-item">
+                                <div class="entry-item" data-type="feeling" data-value="${feeling.word}" data-selectable="true">
                                     <div class="entry-word">${feeling.word}</div>
                                     <div class="entry-definition">${feeling.definition}</div>
                                 </div>
@@ -755,6 +866,7 @@ class SubtextApp {
 
         const container = document.getElementById('feelingsContainer');
         container.innerHTML = html;
+        this.initializeInteractiveReferenceGuide();
     }
 
     /**
@@ -787,7 +899,7 @@ class SubtextApp {
                     <div class="category-content">
                         <div class="entry-list">
                             ${result.needs.map(need => `
-                                <div class="entry-item">
+                                <div class="entry-item" data-type="need" data-value="${need.name}" data-selectable="true">
                                     <div class="entry-word">${need.name}</div>
                                     <div class="entry-definition">${need.definition}</div>
                                 </div>
@@ -800,6 +912,133 @@ class SubtextApp {
 
         const container = document.getElementById('needsContainer');
         container.innerHTML = html;
+        this.initializeInteractiveReferenceGuide();
+    }
+
+    /**
+     * ===== INTERACTIVE REFERENCE GUIDE METHODS =====
+     */
+
+    /**
+     * Handle focus on Feeling or Need field
+     * Auto-open reference guide on first focus, track active field
+     */
+    handleNVCFieldFocus(fieldType) {
+        this.activeNvcField = fieldType;
+
+        // Only auto-open on first focus
+        if (!this.fieldHasFocused[fieldType]) {
+            this.fieldHasFocused[fieldType] = true;
+            this.showReferenceForField(fieldType);
+        }
+    }
+
+    /**
+     * Show reference guide and navigate to correct tab for the field
+     */
+    showReferenceForField(fieldType) {
+        // Open the modal
+        this.showReference();
+
+        // Switch to the appropriate tab
+        if (fieldType === 'feeling') {
+            this.switchReferenceTab('feelings');
+        } else if (fieldType === 'need') {
+            this.switchReferenceTab('needs');
+        }
+    }
+
+    /**
+     * Initialize interactive handlers for reference items
+     * Called after rendering feelings or needs lists
+     */
+    initializeInteractiveReferenceGuide() {
+        // Find all selectable items
+        const selectableItems = document.querySelectorAll('[data-selectable="true"]');
+
+        selectableItems.forEach(item => {
+            // Remove existing listener to avoid duplicates
+            item.style.cursor = 'pointer';
+
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const itemType = item.getAttribute('data-type');
+                const itemValue = item.getAttribute('data-value');
+
+                if (itemType === 'feeling' && this.activeNvcField === 'feeling') {
+                    this.selectReferenceItem(itemType, itemValue);
+                } else if (itemType === 'need' && this.activeNvcField === 'need') {
+                    this.selectReferenceItem(itemType, itemValue);
+                }
+            });
+
+            // Hover feedback
+            item.addEventListener('mouseenter', () => {
+                if ((item.getAttribute('data-type') === 'feeling' && this.activeNvcField === 'feeling') ||
+                    (item.getAttribute('data-type') === 'need' && this.activeNvcField === 'need')) {
+                    item.style.backgroundColor = 'rgba(99, 102, 241, 0.15)';
+                }
+            });
+
+            item.addEventListener('mouseleave', () => {
+                item.style.backgroundColor = '';
+            });
+        });
+    }
+
+    /**
+     * Select an item from the reference guide and insert into active field
+     */
+    selectReferenceItem(itemType, itemValue) {
+        let targetField = null;
+
+        // Determine which field to update
+        if (itemType === 'feeling' && this.activeNvcField === 'feeling') {
+            targetField = this.nvcFeeling;
+        } else if (itemType === 'need' && this.activeNvcField === 'need') {
+            targetField = this.nvcNeed;
+        }
+
+        if (!targetField) return;
+
+        // Insert the value into the field
+        targetField.textContent = itemValue;
+
+        // Highlight the selected item
+        this.highlightSelectedItem(itemType, itemValue);
+
+        // Update field hints
+        this.updateNVCFieldHints();
+
+        // Trigger edit event to update the NVC result
+        const editEvent = new Event('blur', { bubbles: true });
+        targetField.dispatchEvent(editEvent);
+
+        // Close the modal after a brief delay for visual feedback
+        setTimeout(() => {
+            this.closeReference();
+        }, 200);
+    }
+
+    /**
+     * Highlight the selected item in the reference guide
+     */
+    highlightSelectedItem(itemType, itemValue) {
+        // Clear previous highlights
+        const allItems = document.querySelectorAll('[data-selectable="true"]');
+        allItems.forEach(item => {
+            item.classList.remove('selected-reference-item');
+            item.style.borderLeft = '';
+        });
+
+        // Highlight the selected item
+        const selectedItem = document.querySelector(`[data-type="${itemType}"][data-value="${itemValue}"]`);
+        if (selectedItem) {
+            selectedItem.classList.add('selected-reference-item');
+            selectedItem.style.borderLeft = '4px solid var(--primary-color)';
+            selectedItem.style.paddingLeft = 'calc(0.75rem - 4px)';
+            selectedItem.style.backgroundColor = 'rgba(99, 102, 241, 0.1)';
+        }
     }
 }
 

@@ -9,6 +9,12 @@
 <body>
     <div class="container">
         <header>
+            <div class="header-nav-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div></div>
+                <a href="nvc-practice.html" class="nav-link-header" style="color: var(--primary-color); text-decoration: none; font-weight: 600; padding: 0.5rem 1rem; border-radius: 6px; transition: var(--transition); display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <span>🎯</span> Practice NVC
+                </a>
+            </div>
             <h1 class="title">Subtext</h1>
             <p class="subtitle">Understand what's beneath your words</p>
         </header>
@@ -65,9 +71,12 @@
             </section>
 
             <!-- Analyze Button -->
-            <div class="action-section">
+            <div class="action-section" style="gap:0.75rem; flex-wrap: wrap;">
                 <button id="analyzeBtn" class="btn btn-analyze">
                     <span class="icon">✨</span> Analyze & Interpret
+                </button>
+                <button id="toggleNvcBtn" class="btn btn-secondary" style="display:none;">
+                    <span class="icon">🦒</span> Open NVC Interpreter
                 </button>
             </div>
 
@@ -141,7 +150,7 @@
                 <div class="nvc-framework">
                     <div class="nvc-item">
                         <div class="nvc-header">
-                            <h3><span class="nvc-giraffe-icon">🦒</span> Observation</h3>
+                            <h3>Observation</h3>
                             <button class="explanation-btn" data-component="observation" title="Learn about Observation">
                                 <span class="info-icon">ℹ️</span>
                             </button>
@@ -156,7 +165,7 @@
                     </div>
                     <div class="nvc-item">
                         <div class="nvc-header">
-                            <h3><span class="nvc-giraffe-icon">🦒</span> Feeling</h3>
+                            <h3>Feeling</h3>
                             <button class="explanation-btn" data-component="feeling" title="Learn about Feelings">
                                 <span class="info-icon">ℹ️</span>
                             </button>
@@ -171,7 +180,7 @@
                     </div>
                     <div class="nvc-item">
                         <div class="nvc-header">
-                            <h3><span class="nvc-giraffe-icon">🦒</span> Need</h3>
+                            <h3>Need</h3>
                             <button class="explanation-btn" data-component="need" title="Learn about Needs">
                                 <span class="info-icon">ℹ️</span>
                             </button>
@@ -186,12 +195,18 @@
                     </div>
                     <div class="nvc-item">
                         <div class="nvc-header">
-                            <h3><span class="nvc-giraffe-icon">🦒</span> Request</h3>
+                            <h3>Request</h3>
                             <button class="explanation-btn" data-component="request" title="Learn about Requests">
                                 <span class="info-icon">ℹ️</span>
                             </button>
                         </div>
-                        <p id="nvcRequest" class="nvc-content nvc-auto">—</p>
+                        <p 
+                            id="nvcRequest" 
+                            class="nvc-content nvc-editable"
+                            contenteditable="true"
+                            data-field="request"
+                        >—</p>
+                        <small class="edit-hint">💡 Click to edit</small>
                     </div>
                 </div>
             </section>
@@ -206,7 +221,6 @@
 
         <footer>
             <p>� Subtext helps you communicate with clarity and compassion</p>
-            <div class="footer-giraffe-pattern"></div>
         </footer>
     </div>
 

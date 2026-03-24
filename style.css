@@ -3,24 +3,27 @@
    ========================= */
 
 :root {
-    --primary-color: #6366f1;
-    --primary-light: #818cf8;
-    --primary-dark: #4f46e5;
-    --secondary-color: #ec4899;
-    --success-color: #10b981;
-    --danger-color: #ef4444;
-    --warning-color: #f59e0b;
-    
-    --bg-main: #f8fafc;
-    --bg-card: #ffffff;
-    --bg-hover: #f1f5f9;
-    
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --text-light: #94a3b8;
-    
-    --border-color: #e2e8f0;
-    --border-light: #f1f5f9;
+    --primary-color: #65096d;
+    --primary-light: #ca10a2;
+    --primary-dark: #17725a;
+    --secondary-color: #4FD1C5;    /* soft turquoise (less neon than before) */
+    --success-color: #68D391;      /* softer green (not neon) */
+    --danger-color: #F56565;       /* muted red */
+    --warning-color: #F6AD55;      /* warm orange (fits purple better) */
+
+    /* Backgrounds */
+    --bg-main: #FAF8FF;            /* slight purple tint */
+    --bg-card: #FFFFFF;
+    --bg-hover: #F1EEFF;
+
+    /* Text */
+    --text-primary: #2D1B4E;       /* purple-tinted dark */
+    --text-secondary: #6B5E8E;
+    --text-light: #A3A0C3;
+
+    /* Borders */
+    --border-color: #E6E1F5;
+    --border-light: #F3F0FA;
     
     --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
     --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.1);
@@ -505,6 +508,22 @@ footer {
 .nvc-auto {
     color: var(--success);
     font-weight: 500;
+}
+
+/* Placeholder style for fallback "No clear X" messages */
+.nvc-content.field-placeholder {
+    color: var(--text-light);
+    font-style: italic;
+    opacity: 0.65;
+}
+
+.nvc-editable.field-placeholder {
+    background-color: rgba(128, 128, 128, 0.03);
+}
+
+.nvc-editable.field-placeholder:hover {
+    background-color: rgba(99, 102, 241, 0.08);
+    opacity: 0.8;
 }
 
 .edit-hint {
@@ -996,6 +1015,20 @@ footer {
 
 .entry-item:nth-child(4n) {
     border-left-color: var(--warning-color);
+}
+
+/* Interactive Reference Guide Styles */
+[data-selectable="true"] {
+    cursor: pointer;
+}
+
+[data-selectable="true"]:hover {
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+}
+
+.selected-reference-item {
+    background: rgba(99, 102, 241, 0.15) !important;
+    border-left: 4px solid var(--primary-color) !important;
 }
 
 /* =========================

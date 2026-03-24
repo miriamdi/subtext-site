@@ -130,14 +130,161 @@ class NVCFramework {
             'safety': 'Could I feel more secure?',
             'peace': 'I need some peace.'
         };
+
+        // === LISTS OF PURE EMOTION WORDS ===
+        // For validating that a feeling is actually an emotion word
+        this.PURE_EMOTION_WORDS = [
+            'happy', 'joyful', 'ecstatic', 'delighted', 'thrilled', 'excited', 'pleased', 'cheerful',
+            'sad', 'depressed', 'unhappy', 'miserable', 'heartbroken', 'grief-stricken', 'lonely', 'hurt',
+            'angry', 'furious', 'enraged', 'livid', 'mad', 'irritated',
+            'frustrated', 'annoyed', 'exasperated',
+            'scared', 'afraid', 'frightened', 'terrified',
+            'anxious', 'worried', 'nervous', 'apprehensive', 'uneasy',
+            'overwhelmed', 'stressed', 'exhausted', 'confused', 'helpless',
+            'calm', 'peaceful', 'relaxed', 'serene', 'tranquil', 'content', 'composed'
+        ];
+
+        // === UNIVERSAL NEEDS (for validation) ===
+        // Standard NVC universal human needs
+        this.UNIVERSAL_NEEDS = [
+            'autonomy', 'authenticity', 'affection', 'belonging', 'celebration', 'choice',
+            'clarity', 'closeness', 'comfort', 'commitment', 'compassion', 'competence',
+            'connection', 'consideration', 'consistency', 'contribution', 'cooperation',
+            'creativity', 'ease', 'emotional safety', 'encouragement', 'equality',
+            'esteem', 'exercise', 'fairness', 'faith', 'freedom', 'fun', 'gdpr', 'grace',
+            'growth', 'harmony', 'health', 'hope', 'inclusion', 'independence',
+            'inspiration', 'integrity', 'interdependence', 'intimacy', 'joy', 'justice',
+            'kindness', 'knowledge', 'leisure', 'love', 'meaning', 'mutuality',
+            'movement', 'non-violence', 'nurturing', 'order', 'originality', 'peace',
+            'physical safety', 'play', 'pleasure', 'predictability', 'privacy',
+            'progress', 'protection', 'purpose', 'reassurance', 'recognition', 'rest',
+            'respect', 'rest', 'self-care', 'self-knowledge', 'self-respect', 'sexuality',
+            'solitude', 'space', 'spontaneity', 'stability', 'structure', 'support',
+            'trust', 'truth', 'understanding', 'vision', 'warmth', 'welcome', 'wholeness'
+        ];
+
+        // === WORDS THAT INDICATE ACTION (NOT NEED) ===
+        // These suggest a request disguised as a need
+        this.ACTION_WORDS = [
+            'do', 'doing', 'make', 'making', 'help', 'helping', 'give', 'giving',
+            'take', 'taking', 'listen', 'listening', 'talk', 'talking', 'speak', 'speaking',
+            'apologize', 'apologizing', 'change', 'changing', 'stop', 'stopping', 'start', 'starting',
+            'leave', 'leaving', 'go', 'going', 'come', 'coming'
+        ];
     }
 
     /**
-     * PRINCIPLE 1: Extract observation by removing judgment, emotion, interpretation
-     * Keep: Factual descriptions, specific behaviors, what was seen/heard
-     * Remove: Judgment words, emotional exaggeration, interpretation of intent
+     * ===== CONFIDENCE CHECKING METHODS =====
+     * Validate each NVC component to ensure quality
+     */
+
+    /**
+     * Check if observation is valid and confident
+     * @param {string} observation - The observation text
+     * @returns {boolean} - True if observation is valid
+     */
+    isValidObservation(observation) {
+        if (!observation || observation.trim().length < 3) {
+            return false;
+        }
+
+        const lower = observation.toLowerCase();
+        
+        // Check for emotional words that shouldn't be in observation
+        const emotionalMarkers = ['i feel', 'feel so', 'feel very', 'felt so'];
+        for (const marker of emotionalMarkers) {
+            if (lower.includes(marker)) {
+                return false; // Observation contains emotional language
+            }
+        }
+
+        // Check for extreme judgment words
+        const judgmentKeywords = ['hate', 'hateful', 'disgusting', 'terrible', 'horrible', 'awful', 'stupid', 'idiot'];
+        for (const keyword of judgmentKeywords) {
+            if (lower.includes(keyword)) {
+                return false; // Observation contains judgments
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if feeling is a pure emotion word
+     * @param {string} feeling - The feeling/emotion text
+     * @returns {boolean} - True if it's a valid emotion word
+     */
+    isValidFeeling(feeling) {
+        if (!feeling || feeling.trim().length === 0) {
+            return false;
+        }
+
+        // Must be one of our recognized emotion words (case-insensitive)
+        return this.PURE_EMOTION_WORDS.includes(feeling.toLowerCase());
+    }
+
+    /**
+     * Check if need is a universal need (not action-based)
+     * @param {string} need - The need text
+     * @returns {boolean} - True if it's a valid universal need
+     */
+    isValidNeed(need) {
+        if (!need || need.trim().length === 0) {
+            return false;
+        }
+
+        const lowerNeed = need.toLowerCase();
+
+        // Must be a recognized universal need
+        const isUniversalNeed = this.UNIVERSAL_NEEDS.some(un => lowerNeed.includes(un));
+        if (!isUniversalNeed) {
+            return false;
+        }
+
+        // Must not contain action words
+        for (const actionWord of this.ACTION_WORDS) {
+            if (lowerNeed.includes(actionWord)) {
+                return false; // Need contains action words
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if request is actionable and directed
+     * @param {string} request - The request text
+     * @returns {boolean} - True if it's a valid request
+     */
+    isValidRequest(request) {
+        if (!request || request.trim().length === 0) {
+            return false;
+        }
+
+        const lowerRequest = request.toLowerCase();
+
+        // Must contain action-oriented language
+        const actionIndicators = ['could', 'could you', 'would', 'would you', 'can', 'can you', 'will you', 'please', '?'];
+        const hasActionIndicator = actionIndicators.some(indicator => lowerRequest.includes(indicator));
+
+        if (!hasActionIndicator) {
+            return false; // Request doesn't sound like a request
+        }
+
+        // Should be relatively specific (not too vague)
+        const words = request.trim().split(/\s+/).length;
+        if (words < 3) {
+            return false; // Too short to be a meaningful request
+        }
+
+        return true;
+    }
+
+    /**
+     * PRINCIPLE 1: Extract observation - keep EXACTLY what is stated
+     * Only remove extreme emotional exaggeration, not the core message or feelings
      * @param {string} text - Raw input
-     * @returns {string} - Factual, judgment-free observation
+     * @returns {string} - Factual observation (mostly as-stated)
      */
     extractObservation(text) {
         if (!text || text.trim().length === 0) {
@@ -146,33 +293,19 @@ class NVCFramework {
 
         let observation = text.trim();
 
-        // Step 1: Remove emotional judgment words entirely
-        for (const judgment of this.JUDGMENT_WORDS) {
-            const regex = new RegExp(`\\b${judgment}\\b`, 'gi');
+        // Only remove EXTREME exaggeration, NOT emotion words
+        // "I feel frustrated" stays, "I feel SO frustrated" becomes "I feel frustrated"
+        const extremeIntensifiers = [
+            /\b(so|very|really|extremely|incredibly|terribly|awfully)\s+/gi,
+            /\b(absolutely|completely|totally|literally)\s+/gi,
+        ];
+
+        for (const regex of extremeIntensifiers) {
             observation = observation.replace(regex, '');
         }
 
-        // Step 2: Remove emotional intensifiers while keeping the core message
-        for (const intensifier of this.EMOTIONAL_INTENSIFIERS) {
-            const regex = new RegExp(`\\b${intensifier}\\s+`, 'gi');
-            observation = observation.replace(regex, '');
-        }
-
-        // Step 3: Remove "you're being" and similar attribution patterns
-        observation = observation.replace(/you're being\s+\w+(\s+and)?\s*/gi, '');
-
-        // Step 4: Clean up extra spaces created by removals
+        // Clean up extra spaces
         observation = observation.replace(/\s+/g, ' ').trim();
-
-        // Step 5: Handle empty results
-        if (!observation || observation.length < 3) {
-            return '';
-        }
-
-        // Step 6: Ensure clean ending punctuation
-        if (!observation.endsWith('.') && !observation.endsWith('!') && !observation.endsWith('?')) {
-            observation += '.';
-        }
 
         return observation;
     }
@@ -231,23 +364,27 @@ class NVCFramework {
 
     /**
      * PRINCIPLE 4: Generate a concrete, actionable request
-     * Request should be:
-     * - Specific to the observation (not generic)
-     * - Addressed toward the identified need
-     * - Phrased as "could you..." (respects autonomy)
-     * - Concrete and doable (not vague)
-     * @param {string} observation - Extracted factual observation
+     * ONLY generate a request if:
+     * - There is a detected feeling (indicating an unmet need)
+     * - AND the feeling is negative/problematic (not happy/calm)
+     * - Leave blank if no explicit problem or for positive emotions
+     * @param {string} observation - Extracted observation
      * @param {string} feeling - Detected emotion
      * @param {string} need - Primary underlying need
-     * @returns {string} - Specific, polite request
+     * @returns {string} - Request or empty string
      */
     generateRequest(observation, feeling, need) {
-        if (!observation || observation.length === 0) {
-            if (need && this.NEED_REQUEST_PATTERNS[need]) {
-                return this.NEED_REQUEST_PATTERNS[need];
-            }
-            return 'I\'d appreciate your support.';
+        // If no feeling detected, no request
+        if (!feeling || feeling === '') {
+            return '';
         }
+
+        // If feeling is positive (happy/calm), no request needed
+        if (feeling === 'happy' || feeling === 'calm') {
+            return '';
+        }
+
+        // Now we have a negative feeling - generate a request
 
         const lowerObs = observation.toLowerCase();
 
@@ -255,7 +392,6 @@ class NVCFramework {
         // These usually translate to specific requests
         for (const keyword of Object.keys(this.CONCRETE_OBJECTS)) {
             if (lowerObs.includes(keyword)) {
-                // Match observation to specific, doable action
                 if (keyword === 'report' && (lowerObs.includes('incomplete') || lowerObs.includes('unfinished'))) {
                     return 'Could you please complete the report?';
                 }
@@ -281,7 +417,6 @@ class NVCFramework {
         }
 
         // Strategy 2: Generate from identified need
-        // Use need-specific request templates
         if (need && this.NEED_REQUEST_PATTERNS[need]) {
             return this.NEED_REQUEST_PATTERNS[need];
         }
@@ -296,8 +431,11 @@ class NVCFramework {
         if (feeling === 'angry') {
             return 'I\'d like to talk about this with respect for both of us.';
         }
+        if (feeling === 'anxious' || feeling === 'scared') {
+            return 'Could you help me feel more safe?';
+        }
 
-        // Final fallback: generic compassionate request
+        // Final fallback
         return 'Could you support me with this?';
     }
 
@@ -385,28 +523,44 @@ class NVCFramework {
      */
 
     /**
-     * Get current NVC output
+     * Get current NVC output with fallback strings for missing components
      * @returns {object} - {observation, feeling, need, request}
      */
     getOutput() {
         return {
-            observation: this.observation,
-            feeling: this.feeling,
-            need: this.need,
-            request: this.request
+            observation: this.observation && this.isValidObservation(this.observation) 
+                ? this.observation 
+                : 'No clear observation',
+            feeling: this.feeling && this.isValidFeeling(this.feeling) 
+                ? this.feeling 
+                : 'No clear feeling',
+            need: this.need && this.isValidNeed(this.need) 
+                ? this.need 
+                : 'No clear need',
+            request: this.request && this.isValidRequest(this.request) 
+                ? this.request 
+                : 'No clear request'
         };
     }
 
     /**
-     * Get formatted output with placeholders for empty fields
+     * Get formatted output with fallback strings for empty fields
      * @returns {object} - Formatted for display
      */
     getFormattedOutput() {
         return {
-            observation: this.observation || '—',
-            feeling: this.feeling || '—',
-            need: this.need || '—',
-            request: this.request || '—'
+            observation: this.observation && this.isValidObservation(this.observation) 
+                ? this.observation 
+                : 'No clear observation',
+            feeling: this.feeling && this.isValidFeeling(this.feeling) 
+                ? this.feeling 
+                : 'No clear feeling',
+            need: this.need && this.isValidNeed(this.need) 
+                ? this.need 
+                : 'No clear need',
+            request: this.request && this.isValidRequest(this.request) 
+                ? this.request 
+                : 'No clear request'
         };
     }
 
