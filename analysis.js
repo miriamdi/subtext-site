@@ -199,14 +199,6 @@ class EmotionInference {
         // Weight: 35% text energy, 65% audio arousal
         const combinedArousal = (textArousal * 0.35) + (audioArousal * 0.65);
 
-        // Determine confidence based on alignment
-        const confidence = this.calculateConfidence(
-            textValence,
-            audioValenceHint,
-            textArousal,
-            audioArousal
-        );
-
         return {
             valence: Math.max(-1, Math.min(1, combinedValence)),
             arousal: Math.max(0, Math.min(1, combinedArousal)),
@@ -214,8 +206,7 @@ class EmotionInference {
             textValence,
             textArousal,
             audioArousal,
-            audioValenceHint,
-            confidence
+            audioValenceHint
         };
     }
 
@@ -253,19 +244,7 @@ class EmotionInference {
         return Math.max(-0.5, Math.min(0.5, valence)); // Limit to ±0.5
     }
 
-    /**
-     * Calculate confidence level for emotion inference
-     */
-    calculateConfidence(textValence, audioValence, textArousal, audioArousal) {
-        // Confidence increases when signals align
-        const valenceAlignment = 1 - Math.abs(textValence - audioValence);
-        const arousalAlignment = 1 - Math.abs(textArousal - audioArousal);
 
-        const baseConfidence = (valenceAlignment * 0.5 + arousalAlignment * 0.5);
-        
-        // Add slight boost if both text and audio present
-        return Math.min(1, baseConfidence * 0.95 + 0.1);
-    }
 
     /**
      * Get emotion labels based on valence and arousal

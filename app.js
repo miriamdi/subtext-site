@@ -14,6 +14,9 @@ class SubtextApp {
         this.translationResult = null;
         this.analyzedText = null; // Text used for analysis (translated if needed)
 
+        // Initialize the processing pipeline
+        this.pipeline = new SubtextPipeline();
+
         this.initializeElements();
         this.attachEventListeners();
     }
@@ -56,7 +59,6 @@ class SubtextApp {
         this.emotionPoint = document.getElementById('emotionPoint');
         this.valenceValue = document.getElementById('valenceValue');
         this.arousalValue = document.getElementById('arousalValue');
-        this.confidenceValue = document.getElementById('confidenceValue');
 
         // Results panel
         this.resultsPanel = document.getElementById('resultsPanel');
@@ -78,6 +80,16 @@ class SubtextApp {
         this.stopBtn.addEventListener('click', () => this.stopRecording());
         this.analyzeBtn.addEventListener('click', () => this.analyzeEmotion());
         this.clearBtn.addEventListener('click', () => this.resetApp());
+
+        // Attach listeners to editable NVC fields
+        this.nvcObservation.addEventListener('blur', (e) => this.handleNVCFieldEdit(e));
+        this.nvcFeeling.addEventListener('blur', (e) => this.handleNVCFieldEdit(e));
+        this.nvcNeed.addEventListener('blur', (e) => this.handleNVCFieldEdit(e));
+
+        // Also handle immediate updates while typing (optional)
+        this.nvcObservation.addEventListener('input', (e) => this.handleNVCFieldInput(e));
+        this.nvcFeeling.addEventListener('input', (e) => this.handleNVCFieldInput(e));
+        this.nvcNeed.addEventListener('input', (e) => this.handleNVCFieldInput(e));
     }
 
     /**
@@ -247,9 +259,19 @@ class SubtextApp {
             this.emotion = emotionInference.inferEmotion(this.audioFeatures, this.analyzedText);
             console.log('[APP-DEBUG] Emotion result:', this.emotion);
 
-            // Generate NVC response using the English text
-            console.log('[APP-DEBUG] Generating NVC...');
-            this.nvcResult = nvcAgent.generateNVC(this.emotion, this.audioFeatures, this.analyzedText);
+            // Generate NVC response using the pipeline
+            // Pipeline Stage 1: Analyze emotional tone from audio
+            // Pipeline Stage 2: Transform text to NVC structure
+            console.log('[APP-DEBUG] Processing through pipeline...');
+            const pipelineResult = this.pipeline.process(
+                this.emotion,
+                this.audioFeatures,
+                this.analyzedText,
+                this.analyzedText
+            );
+            
+            this.nvcResult = pipelineResult.stage2.data;
+            console.log('[APP-DEBUG] Pipeline complete:', pipelineResult);
 
             // Display results
             this.displayEmotionState();
@@ -293,7 +315,7 @@ class SubtextApp {
      * Display emotion state on 2D plane
      */
     displayEmotionState() {
-        const { valence, arousal, confidence } = this.emotion;
+        const { valence, arousal } = this.emotion;
 
         // Position on 2D plane (300x300, centered at 150,150)
         const x = 150 + (valence * 150); // valence: -1 to 1 → 0 to 300
@@ -308,14 +330,12 @@ class SubtextApp {
 
         this.valenceValue.textContent = `${valenceLabel} (${(valence * 100).toFixed(0)})`;
         this.arousalValue.textContent = `${arousalLabel} (${(arousal * 100).toFixed(0)})`;
-        this.confidenceValue.textContent = `${(confidence * 100).toFixed(0)}%`;
 
         this.emotionPanel.style.display = 'block';
 
         console.log('Emotion State:', {
             valence: valence.toFixed(2),
-            arousal: arousal.toFixed(2),
-            confidence: confidence.toFixed(2)
+            arousal: arousal.toFixed(2)
         });
     }
 
@@ -333,6 +353,84 @@ class SubtextApp {
         this.resultsPanel.style.display = 'block';
 
         console.log('NVC Generated:', nvc);
+    }
+
+    /**
+     * User edits observation - request auto-updates
+     */
+    editNVCObservation(newObservation) {
+        console.log('[App] User editing observation:', newObservation);
+        const updated = this.pipeline.editObservation(newObservation);
+        this.nvcResult = updated;
+        this.displayNVCResults();
+    }
+
+    /**
+     * User edits feeling - need and request auto-update
+     */
+    editNVCFeeling(newFeeling) {
+        console.log('[App] User editing feeling:', newFeeling);
+        const updated = this.pipeline.editFeeling(newFeeling);
+        this.nvcResult = updated;
+        this.displayNVCResults();
+    }
+
+    /**
+     * User edits need - request auto-updates
+     */
+    editNVCNeed(newNeed) {
+        console.log('[App] User editing need:', newNeed);
+        const updated = this.pipeline.editNeed(newNeed);
+        this.nvcResult = updated;
+        this.displayNVCResults();
+    }
+
+    /**
+     * Handle NVC field blur event - calls appropriate edit method
+     */
+    handleNVCFieldEdit(event) {
+        const field = event.target.getAttribute('data-field');
+        const newValue = event.target.textContent.trim();
+
+        if (!newValue) return; // Don't update if empty
+
+        console.log('[App] NVC field edited:', field, newValue);
+
+        if (field === 'observation') {
+            this.editNVCObservation(newValue);
+        } else if (field === 'feeling') {
+            this.editNVCFeeling(newValue);
+        } else if (field === 'need') {
+            this.editNVCNeed(newValue);
+        }
+    }
+
+    /**
+     * Handle NVC field input event - live updates while typing
+     */
+    handleNVCFieldInput(event) {
+        const field = event.target.getAttribute('data-field');
+        const newValue = event.target.textContent.trim();
+
+        if (!newValue) return;
+
+        // For feeling field, only update if it's a valid feeling
+        if (field === 'feeling') {
+            if (!this.pipeline.nvc.FEELING_LIST.includes(newValue.toLowerCase())) {
+                return; // Don't update if not a valid feeling
+            }
+        }
+
+        console.log('[App] NVC field live update:', field);
+        
+        // Update immediately without waiting for blur
+        if (field === 'observation') {
+            this.editNVCObservation(newValue);
+        } else if (field === 'feeling') {
+            this.editNVCFeeling(newValue);
+        } else if (field === 'need') {
+            this.editNVCNeed(newValue);
+        }
     }
 
     /**
@@ -365,6 +463,9 @@ class SubtextApp {
         this.nvcResult = null;
         this.translationResult = null;
         this.analyzedText = null;
+
+        // Reset pipeline
+        this.pipeline.reset();
 
         // Clear speech recognition callback
         audioManager.onTextRecognized = null;

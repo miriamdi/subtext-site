@@ -127,10 +127,6 @@
                         <span class="label">Arousal (Energy):</span>
                         <span class="value" id="arousalValue">—</span>
                     </div>
-                    <div class="emotion-value">
-                        <span class="label">Confidence:</span>
-                        <span class="value" id="confidenceValue">—</span>
-                    </div>
                 </div>
             </section>
 
@@ -140,19 +136,38 @@
                 <div class="nvc-framework">
                     <div class="nvc-item">
                         <h3>Observation</h3>
-                        <p id="nvcObservation" class="nvc-content">—</p>
+                        <p 
+                            id="nvcObservation" 
+                            class="nvc-content nvc-editable"
+                            contenteditable="true"
+                            data-field="observation"
+                        >—</p>
+                        <small class="edit-hint">💡 Click to edit</small>
                     </div>
                     <div class="nvc-item">
                         <h3>Feeling</h3>
-                        <p id="nvcFeeling" class="nvc-content">—</p>
+                        <p 
+                            id="nvcFeeling" 
+                            class="nvc-content nvc-editable"
+                            contenteditable="true"
+                            data-field="feeling"
+                        >—</p>
+                        <small class="edit-hint">💡 Click to edit</small>
                     </div>
                     <div class="nvc-item">
                         <h3>Need</h3>
-                        <p id="nvcNeed" class="nvc-content">—</p>
+                        <p 
+                            id="nvcNeed" 
+                            class="nvc-content nvc-editable"
+                            contenteditable="true"
+                            data-field="need"
+                        >—</p>
+                        <small class="edit-hint">💡 Click to edit</small>
                     </div>
                     <div class="nvc-item">
                         <h3>Request</h3>
-                        <p id="nvcRequest" class="nvc-content">—</p>
+                        <p id="nvcRequest" class="nvc-content nvc-auto">—</p>
+                        <small class="auto-hint">🔄 Updates automatically</small>
                     </div>
                 </div>
             </section>
@@ -174,6 +189,8 @@
     <script src="audio.js"></script>
     <script src="analysis.js"></script>
     <script src="agent.js"></script>
+    <script src="nvc.js"></script>
+    <script src="pipeline.js"></script>
     <script src="translation.js"></script>
     <script src="app.js"></script>
 </body>

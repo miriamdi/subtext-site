@@ -485,6 +485,48 @@ footer {
     line-height: 1.6;
 }
 
+.nvc-editable {
+    cursor: text;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.nvc-editable:hover {
+    background-color: rgba(99, 102, 241, 0.1);
+}
+
+.nvc-editable:focus {
+    outline: 2px solid var(--primary);
+    background-color: rgba(99, 102, 241, 0.15);
+    padding: 0.5rem;
+}
+
+.nvc-auto {
+    color: var(--success);
+    font-weight: 500;
+}
+
+.edit-hint {
+    display: block;
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.nvc-item:hover .edit-hint {
+    opacity: 1;
+}
+
+.auto-hint {
+    display: block;
+    color: var(--success);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
 /* =========================
    Translation Panel
    ========================= */
