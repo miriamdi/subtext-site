@@ -132,20 +132,35 @@
 
             <!-- NVC Results Section -->
             <section class="panel results-panel" id="resultsPanel" style="display:none;">
-                <h2>Nonviolent Communication (NVC)</h2>
+                <div class="results-header">
+                    <h2>Nonviolent Communication (NVC)</h2>
+                    <button id="referenceBtn" class="btn btn-reference" title="Open Needs & Feelings reference">
+                        <span class="icon">📚</span> Reference Guide
+                    </button>
+                </div>
                 <div class="nvc-framework">
                     <div class="nvc-item">
-                        <h3>Observation</h3>
+                        <div class="nvc-header">
+                            <h3><span class="nvc-giraffe-icon">🦒</span> Observation</h3>
+                            <button class="explanation-btn" data-component="observation" title="Learn about Observation">
+                                <span class="info-icon">ℹ️</span>
+                            </button>
+                        </div>
                         <p 
                             id="nvcObservation" 
                             class="nvc-content nvc-editable"
                             contenteditable="true"
                             data-field="observation"
                         >—</p>
-                        <small class="edit-hint">💡 Click to edit</small>
+                        <small class="edit-hint">💡 Click text to edit</small>
                     </div>
                     <div class="nvc-item">
-                        <h3>Feeling</h3>
+                        <div class="nvc-header">
+                            <h3><span class="nvc-giraffe-icon">🦒</span> Feeling</h3>
+                            <button class="explanation-btn" data-component="feeling" title="Learn about Feelings">
+                                <span class="info-icon">ℹ️</span>
+                            </button>
+                        </div>
                         <p 
                             id="nvcFeeling" 
                             class="nvc-content nvc-editable"
@@ -155,7 +170,12 @@
                         <small class="edit-hint">💡 Click to edit</small>
                     </div>
                     <div class="nvc-item">
-                        <h3>Need</h3>
+                        <div class="nvc-header">
+                            <h3><span class="nvc-giraffe-icon">🦒</span> Need</h3>
+                            <button class="explanation-btn" data-component="need" title="Learn about Needs">
+                                <span class="info-icon">ℹ️</span>
+                            </button>
+                        </div>
                         <p 
                             id="nvcNeed" 
                             class="nvc-content nvc-editable"
@@ -165,9 +185,13 @@
                         <small class="edit-hint">💡 Click to edit</small>
                     </div>
                     <div class="nvc-item">
-                        <h3>Request</h3>
+                        <div class="nvc-header">
+                            <h3><span class="nvc-giraffe-icon">🦒</span> Request</h3>
+                            <button class="explanation-btn" data-component="request" title="Learn about Requests">
+                                <span class="info-icon">ℹ️</span>
+                            </button>
+                        </div>
                         <p id="nvcRequest" class="nvc-content nvc-auto">—</p>
-                        <small class="auto-hint">🔄 Updates automatically</small>
                     </div>
                 </div>
             </section>
@@ -181,8 +205,54 @@
         </main>
 
         <footer>
-            <p>🤝 Subtext helps you communicate with clarity and compassion</p>
+            <p>� Subtext helps you communicate with clarity and compassion</p>
+            <div class="footer-giraffe-pattern"></div>
         </footer>
+    </div>
+
+    <!-- Explanation Modal -->
+    <div id="explanationModal" class="modal" style="display:none;">
+        <div class="modal-content explanation-modal">
+            <button class="modal-close" id="closeExplanation">×</button>
+            <div id="explanationContent">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Reference Page Modal -->
+    <div id="referenceModal" class="modal" style="display:none;">
+        <div class="modal-content reference-modal">
+            <button class="modal-close" id="closeReference">×</button>
+            <h2>NVC Reference Guide</h2>
+            
+            <div class="reference-tabs">
+                <button class="reference-tab-btn active" data-tab="feelings">Feelings & Emotions</button>
+                <button class="reference-tab-btn" data-tab="needs">Needs & Values</button>
+            </div>
+
+            <div class="reference-content">
+                <!-- Feelings Tab -->
+                <div id="feelingsTab" class="reference-section active">
+                    <div class="search-box">
+                        <input type="text" id="feelingsSearch" placeholder="Search feelings..." class="search-input">
+                    </div>
+                    <div id="feelingsContainer" class="reference-categories">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Needs Tab -->
+                <div id="needsTab" class="reference-section">
+                    <div class="search-box">
+                        <input type="text" id="needsSearch" placeholder="Search needs..." class="search-input">
+                    </div>
+                    <div id="needsContainer" class="reference-categories">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -192,6 +262,7 @@
     <script src="nvc.js"></script>
     <script src="pipeline.js"></script>
     <script src="translation.js"></script>
+    <script src="reference.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

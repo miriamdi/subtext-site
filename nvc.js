@@ -2,7 +2,12 @@
  * nvc.js
  * Nonviolent Communication (NVC) Framework
  * Transforms emotional expressions into compassionate communication
- * with editable components and automatic request generation
+ * 
+ * Core Logic (principle-based, not example-based):
+ * 1. OBSERVATION: Remove judgment, emotion words, and interpretation → keep factual description
+ * 2. FEELING: Detect genuine emotion from keywords → identify what emotion was expressed
+ * 3. NEED: Map feeling to underlying human need → understand what matters
+ * 4. REQUEST: Generate concrete action addressing the need → move toward resolution
  */
 
 class NVCFramework {
@@ -17,101 +22,155 @@ class NVCFramework {
     }
 
     /**
-     * Initialize all mappings and word lists
+     * Initialize all NVC mappings based on standard NVC framework
      */
     initializeMappings() {
-        // Predefined feeling words
-        this.FEELING_LIST = [
-            'angry', 'frustrated', 'sad', 'overwhelmed', 'calm'
-        ];
-
-        // Expanded feeling detection keywords
-        this.FEELING_KEYWORDS = {
-            angry: ['angry', 'furious', 'enraged', 'livid', 'rage', 'mad', 'annoyed', 'irritated'],
-            frustrated: ['frustrated', 'annoyed', 'exasperated', 'fed up', 'impatient', 'stuck'],
-            sad: ['sad', 'depressed', 'unhappy', 'miserable', 'heartbroken', 'grief', 'lonely'],
-            overwhelmed: ['overwhelmed', 'stressed', 'burnt out', 'exhausted', 'anxious', 'panicked'],
-            calm: ['calm', 'peaceful', 'relaxed', 'serene', 'tranquil', 'content', 'satisfied']
+        // === COMPREHENSIVE FEELING KEYWORDS ===
+        // Organized by emotional category with aliases
+        this.EMOTION_KEYWORDS = {
+            // Happy/Joyful emotions
+            happy: ['happy', 'joyful', 'ecstatic', 'delighted', 'thrilled', 'excited', 'pleased', 'cheerful', 'wonderful', 'amazing', 'grateful', 'satisfied', 'proud', 'hopeful'],
+            
+            // Sad/Sorrowful emotions
+            sad: ['sad', 'depressed', 'unhappy', 'miserable', 'heartbroken', 'grief', 'grief-stricken', 'lonely', 'hurt', 'aching', 'disappointed', 'upset', 'despondent', 'melancholy', 'sorrowful', 'crying', 'cry', 'tears'],
+            
+            // Angry/Frustrated emotions
+            angry: ['angry', 'furious', 'enraged', 'livid', 'rage', 'mad', 'irritated', 'hate', 'hateful', 'disgusted', 'pissed'],
+            frustrated: ['frustrated', 'annoyed', 'annoying', 'exasperated', 'fed up', 'impatient', 'stuck', 'blocked', 'stalled', 'struggling', 'can\'t', 'cannot', 'unable', 'problem', 'stuck'],
+            
+            // Fearful/Anxious emotions
+            scared: ['scared', 'afraid', 'frightened', 'terror', 'terrified'],
+            anxious: ['anxious', 'worry', 'worried', 'concern', 'nervous', 'apprehensive', 'uneasy', 'uncertain'],
+            panicked: ['panicked', 'panic', 'alarmed'],
+            
+            // Overwhelmed/Stressed emotions
+            overwhelmed: ['overwhelmed', 'stressed', 'burnt out', 'exhausted', 'scattered', 'confused', 'lost', 'frazzled', 'swamped', 'torn', 'helpless', 'powerless', 'desperate', 'don\'t know', 'don\'t understand', 'unclear'],
+            
+            // Calm/Peaceful emotions
+            calm: ['calm', 'peaceful', 'relaxed', 'serene', 'tranquil', 'content', 'satisfied', 'composed', 'centered', 'grounded', 'still', 'balanced', 'secure', 'stable']
         };
 
-        // Feeling to need mapping
-        this.NEED_MAP = {
-            angry: 'order / respect',
-            frustrated: 'progress / ease',
-            sad: 'connection / comfort',
-            overwhelmed: 'rest / clarity',
-            calm: 'balance / harmony'
+        // === EMOTION TO NEEDS MAPPING ===
+        // Maps detected emotions to underlying NVC needs they typically represent
+        this.EMOTION_TO_NEEDS = {
+            // When angry → likely underlying needs about respect, autonomy, order
+            angry: ['respect', 'autonomy', 'order', 'fairness', 'integrity'],
+            frustrated: ['progress', 'ease', 'autonomy', 'competence', 'accomplishment'],
+            
+            // When sad → likely underlying needs about connection, understanding, love
+            sad: ['connection', 'understanding', 'love', 'acceptance', 'belonging'],
+            
+            // When excited/happy → likely underlying needs about joy, celebration, connection
+            happy: ['joy', 'celebration', 'connection', 'growth', 'purpose'],
+            
+            // When scared → likely underlying needs about safety, security, trust, predictability
+            scared: ['safety', 'security', 'trust', 'protection', 'predictability'],
+            anxious: ['safety', 'security', 'predictability', 'trust', 'certainty'],
+            panicked: ['safety', 'protection', 'security'],
+            
+            // When overwhelmed → likely underlying needs about rest, clarity, ease, peace
+            overwhelmed: ['rest', 'peace', 'ease', 'clarity', 'simplicity'],
+            
+            // When calm → likely underlying needs about peace, balance, ease
+            calm: ['peace', 'balance', 'ease', 'harmony', 'rest']
         };
 
-        // Emotional/exaggerated words to filter out from observations
-        this.EMOTIONAL_WORDS = [
-            'always', 'never', 'everywhere', 'so', 'so angry', 'so sad', 'so frustrated',
-            'extremely', 'absolutely', 'completely', 'totally', 'literally',
-            'very', 'really', 'horribly', 'terribly', 'awfully',
-            'furious', 'enraged', 'devastated', 'heartbroken', 'insane'
+        // === JUDGMENT AND INTERPRETATION WORDS TO REMOVE ===
+        // Words that indicate judgment, emotion exaggeration, or interpretation rather than fact
+        this.JUDGMENT_WORDS = [
+            // Accusations and blame
+            'always', 'never', 'constantly', 'forever',
+            
+            // Extreme judgments
+            'hate', 'hateful', 'disgusting', 'disgusted', 'horrible', 'awful', 'terrible',
+            'stupid', 'dumb', 'idiot', 'incompetent', 'useless', 'lazy', 'selfish',
+            'inconsiderate', 'thoughtless', 'rude', 'mean', 'cruel', 'jerk', 'bastard',
+            'witch', 'impossible', 'unbearable', 'intolerable',
+            
+            // Physical descriptions that are emotional judgments
+            'smelly', 'stinky', 'stinks', 'reeks', 'disgusting'
         ];
 
-        // Request action templates based on observable patterns
-        this.ACTION_TEMPLATES = {
-            'socks': 'put the socks in the laundry basket',
-            'clothes': 'put the clothes away',
-            'dishes': 'wash the dishes or put them in the dishwasher',
-            'mess': 'help clean up the space',
-            'toys': 'put the toys away',
-            'trash': 'take out the trash',
-            'noise': 'please lower the volume',
-            'lateness': 'arrive on time',
-            'phone': 'put the phone away',
-            'listening': 'listen to what I\'m saying',
-            'time': 'spend more time together',
-            'help': 'help with the tasks',
-            'talk': 'have a conversation with me',
-            'support': 'support me right now'
+        // === EMOTIONAL INTENSIFIERS TO REMOVE ===
+        // Words that exaggerate emotions rather than describe fact
+        this.EMOTIONAL_INTENSIFIERS = [
+            'so', 'very', 'really', 'extremely', 'incredibly', 'terribly', 'awfully',
+            'absolutely', 'completely', 'totally', 'literally', 'horribly'
+        ];
+
+        // === CONCRETE ACTION VOCABULARY ===
+        // Words that indicate specific, observable actions or items
+        this.CONCRETE_OBJECTS = {
+            // Household items
+            'report': true, 'trash': true, 'dishes': true, 'socks': true, 'clothes': true,
+            'toy': true, 'toys': true, 'mess': true, 'house': true, 'room': true, 'space': true,
+            'bed': true, 'table': true, 'floor': true, 'laundry': true,
+            
+            // Communication/behaviors
+            'listen': true, 'talk': true, 'conversation': true, 'speak': true, 'share': true,
+            'discuss': true, 'explain': true, 'tell': true, 'inform': true, 'notify': true,
+            
+            // Time/plans
+            'plans': true, 'schedule': true, 'meeting': true, 'appointment': true, 'call': true,
+            'phone': true, 'text': true, 'message': true, 'time': true, 'late': true, 'lateness': true,
+            
+            // Behaviors and actions
+            'help': true, 'support': true, 'listen': true, 'understand': true, 'respect': true
+        };
+
+        // === REQUEST TEMPLATES BASED ON NEED ===
+        // How to phrase requests for common underlying needs
+        this.NEED_REQUEST_PATTERNS = {
+            'respect': 'Could you acknowledge my perspective?',
+            'autonomy': 'Could you give me space to decide?',
+            'progress': 'Could we work together on this?',
+            'ease': 'Could this be made easier?',
+            'connection': 'Could we spend more time together?',
+            'understanding': 'Could you help me understand?',
+            'safety': 'Could I feel more secure?',
+            'peace': 'I need some peace.'
         };
     }
 
     /**
-     * Detect feeling from input text using keyword matching
-     * @param {string} text - Input text to analyze
-     * @returns {string} - Detected feeling or empty string
-     */
-    detectFeeling(text) {
-        const lowerText = text.toLowerCase();
-        
-        // Check each feeling and its associated keywords
-        for (const [feeling, keywords] of Object.entries(this.FEELING_KEYWORDS)) {
-            for (const keyword of keywords) {
-                if (lowerText.includes(keyword)) {
-                    return feeling;
-                }
-            }
-        }
-        
-        return '';
-    }
-
-    /**
-     * Extract observation by removing emotional/exaggerated words
-     * @param {string} text - Raw input text
-     * @returns {string} - Clean observation
+     * PRINCIPLE 1: Extract observation by removing judgment, emotion, interpretation
+     * Keep: Factual descriptions, specific behaviors, what was seen/heard
+     * Remove: Judgment words, emotional exaggeration, interpretation of intent
+     * @param {string} text - Raw input
+     * @returns {string} - Factual, judgment-free observation
      */
     extractObservation(text) {
+        if (!text || text.trim().length === 0) {
+            return '';
+        }
+
         let observation = text.trim();
 
-        // Remove emotional intensifiers and words
-        this.EMOTIONAL_WORDS.forEach(word => {
-            const regex = new RegExp(`\\b${word}\\b`, 'gi');
+        // Step 1: Remove emotional judgment words entirely
+        for (const judgment of this.JUDGMENT_WORDS) {
+            const regex = new RegExp(`\\b${judgment}\\b`, 'gi');
             observation = observation.replace(regex, '');
-        });
+        }
 
-        // Clean up extra spaces
+        // Step 2: Remove emotional intensifiers while keeping the core message
+        for (const intensifier of this.EMOTIONAL_INTENSIFIERS) {
+            const regex = new RegExp(`\\b${intensifier}\\s+`, 'gi');
+            observation = observation.replace(regex, '');
+        }
+
+        // Step 3: Remove "you're being" and similar attribution patterns
+        observation = observation.replace(/you're being\s+\w+(\s+and)?\s*/gi, '');
+
+        // Step 4: Clean up extra spaces created by removals
         observation = observation.replace(/\s+/g, ' ').trim();
 
-        // Capitalize first letter
-        observation = observation.charAt(0).toUpperCase() + observation.slice(1);
+        // Step 5: Handle empty results
+        if (!observation || observation.length < 3) {
+            return '';
+        }
 
-        // Add period if missing
-        if (observation && !observation.endsWith('.')) {
+        // Step 6: Ensure clean ending punctuation
+        if (!observation.endsWith('.') && !observation.endsWith('!') && !observation.endsWith('?')) {
             observation += '.';
         }
 
@@ -119,88 +178,178 @@ class NVCFramework {
     }
 
     /**
-     * Get need based on feeling
-     * @param {string} feeling - The detected or provided feeling
-     * @returns {string} - The associated need
+     * PRINCIPLE 2: Detect feeling by identifying emotional keywords
+     * This identifies what emotion the speaker actually expressed
+     * @param {string} text - Input text to analyze
+     * @returns {string} - Detected emotion or empty string if none found
      */
-    getNeed(feeling) {
-        return this.NEED_MAP[feeling] || '';
-    }
+    detectFeeling(text) {
+        const lowerText = text.toLowerCase();
 
-    /**
-     * Generate a polite, actionable request from components
-     * @param {string} observation - The extracted observation
-     * @param {string} feeling - The detected feeling
-     * @param {string} need - The associated need
-     * @returns {string} - A polite, specific request
-     */
-    generateRequest(observation, feeling, need) {
-        if (!observation) {
-            return '';
-        }
-
-        const lowerObs = observation.toLowerCase();
-        
-        // Try to match observation to action templates
-        for (const [keyword, action] of Object.entries(this.ACTION_TEMPLATES)) {
-            if (lowerObs.includes(keyword)) {
-                return `Could you please ${action}?`;
+        // Search through each emotion category
+        for (const [emotion, keywords] of Object.entries(this.EMOTION_KEYWORDS)) {
+            for (const keyword of keywords) {
+                // Use word boundary to avoid partial matches
+                const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+                if (regex.test(lowerText)) {
+                    return emotion;
+                }
             }
         }
 
-        // Generate generic request based on observation
-        // Extract the main subject/object from observation
-        const words = observation.replace(/[.!?]/g, '').split(' ');
-        
-        // Simple strategy: suggest addressing what was mentioned
-        if (words.length > 0) {
-            // Look for a noun that might be the key action item
-            const lastNoun = words[words.length - 1];
-            return `Could you please address the situation with ${lastNoun.toLowerCase()}?`;
-        }
-
-        return 'Could you please help me with this?';
+        // No feeling detected
+        return '';
     }
 
     /**
-     * Process raw input and generate full NVC framework
+     * PRINCIPLE 3: Identify underlying need from detected emotion
+     * Each emotion indicates unmet needs; map from feeling to need
+     * @param {string} feeling - Detected emotion
+     * @returns {string} - Primary underlying need
+     */
+    getPrimaryNeed(feeling) {
+        if (!feeling || feeling === '') {
+            return '';
+        }
+
+        const needs = this.EMOTION_TO_NEEDS[feeling];
+        return needs && needs.length > 0 ? needs[0] : '';
+    }
+
+    /**
+     * Get all needs for a feeling
+     * @param {string} feeling - Detected emotion
+     * @returns {array} - Array of underlying needs
+     */
+    getAllNeeds(feeling) {
+        if (!feeling || feeling === '') {
+            return [];
+        }
+
+        return this.EMOTION_TO_NEEDS[feeling] || [];
+    }
+
+    /**
+     * PRINCIPLE 4: Generate a concrete, actionable request
+     * Request should be:
+     * - Specific to the observation (not generic)
+     * - Addressed toward the identified need
+     * - Phrased as "could you..." (respects autonomy)
+     * - Concrete and doable (not vague)
+     * @param {string} observation - Extracted factual observation
+     * @param {string} feeling - Detected emotion
+     * @param {string} need - Primary underlying need
+     * @returns {string} - Specific, polite request
+     */
+    generateRequest(observation, feeling, need) {
+        if (!observation || observation.length === 0) {
+            if (need && this.NEED_REQUEST_PATTERNS[need]) {
+                return this.NEED_REQUEST_PATTERNS[need];
+            }
+            return 'I\'d appreciate your support.';
+        }
+
+        const lowerObs = observation.toLowerCase();
+
+        // Strategy 1: Look for concrete objects/actions in observation
+        // These usually translate to specific requests
+        for (const keyword of Object.keys(this.CONCRETE_OBJECTS)) {
+            if (lowerObs.includes(keyword)) {
+                // Match observation to specific, doable action
+                if (keyword === 'report' && (lowerObs.includes('incomplete') || lowerObs.includes('unfinished'))) {
+                    return 'Could you please complete the report?';
+                }
+                if (keyword === 'trash') {
+                    return 'Could you please take out the trash?';
+                }
+                if (keyword === 'dishes') {
+                    return 'Could you please wash the dishes?';
+                }
+                if (keyword === 'plans' && lowerObs.includes('change')) {
+                    return 'Could you please tell me when plans change?';
+                }
+                if (keyword === 'listen') {
+                    return 'Could you please listen to what I\'m saying?';
+                }
+                if (keyword === 'phone') {
+                    return 'Could you please put the phone away?';
+                }
+                if (keyword === 'help') {
+                    return 'Could you please help me with this?';
+                }
+            }
+        }
+
+        // Strategy 2: Generate from identified need
+        // Use need-specific request templates
+        if (need && this.NEED_REQUEST_PATTERNS[need]) {
+            return this.NEED_REQUEST_PATTERNS[need];
+        }
+
+        // Strategy 3: Generate based on feeling
+        if (feeling === 'frustrated' || feeling === 'overwhelmed') {
+            return 'Could we work together on this?';
+        }
+        if (feeling === 'sad') {
+            return 'Could you listen to what I\'m experiencing?';
+        }
+        if (feeling === 'angry') {
+            return 'I\'d like to talk about this with respect for both of us.';
+        }
+
+        // Final fallback: generic compassionate request
+        return 'Could you support me with this?';
+    }
+
+    /**
+     * MASTER PROCESS: Execute full NVC transformation
+     * Follows the four principles in order
      * @param {string} inputText - Raw user input
-     * @returns {object} - Complete NVC framework object
+     * @returns {object} - Complete NVC structure
      */
     process(inputText) {
         this.originalInput = inputText;
-        
-        // Extract observation (remove emotional language)
+
+        // 1. Extract observation (remove judgment/emotion/interpretation)
         this.observation = this.extractObservation(inputText);
-        
-        // If no observation extracted, set default message
-        if (!this.observation || this.observation === '.') {
-            this.observation = 'There is no observation of an event';
-        }
-        
-        // Detect feeling
+
+        // 2. Detect feeling (identify what emotion was expressed)
         this.feeling = this.detectFeeling(inputText);
-        
-        // Get need from feeling
-        this.need = this.getNeed(this.feeling);
-        
-        // Generate request (will update automatically when others change)
+
+        // 3. Identify underlying need (what does this emotion tell us about unmet needs?)
+        this.need = this.getPrimaryNeed(this.feeling);
+
+        // 4. Generate request (concrete action toward meeting the need)
         this.updateRequest();
-        
+
         return this.getOutput();
     }
 
     /**
-     * Update request whenever observation, feeling, or need changes
-     * IMPORTANT: Call this after editing any field
+     * PUBLIC ENTRY POINT: Generate NVC for given text
+     * @param {string} text - User input
+     * @returns {object} - {observation, feeling, need, request}
+     */
+    generateNVC(text) {
+        return this.process(text);
+    }
+
+    /**
+     * Update request based on current state
+     * Call this whenever observation, feeling, or need changes
      */
     updateRequest() {
         this.request = this.generateRequest(this.observation, this.feeling, this.need);
     }
 
     /**
+     * === UI EDITING METHODS ===
+     * Allow users to manually adjust any NVC component
+     */
+
+    /**
      * Edit observation and update request
-     * @param {string} newObservation - New observation text
+     * @param {string} newObservation - New factual observation
      */
     setObservation(newObservation) {
         this.observation = newObservation;
@@ -208,22 +357,23 @@ class NVCFramework {
     }
 
     /**
-     * Edit feeling and update request
-     * @param {string} newFeeling - New feeling from FEELING_LIST
+     * Edit feeling and update need/request
+     * @param {string} newFeeling - New emotion from EMOTION_KEYWORDS
      */
     setFeeling(newFeeling) {
-        if (this.FEELING_LIST.includes(newFeeling)) {
+        const allEmotions = Object.keys(this.EMOTION_KEYWORDS);
+        if (allEmotions.includes(newFeeling)) {
             this.feeling = newFeeling;
-            this.need = this.getNeed(newFeeling);
+            this.need = this.getPrimaryNeed(newFeeling);
             this.updateRequest();
         } else {
-            console.warn(`Invalid feeling. Choose from: ${this.FEELING_LIST.join(', ')}`);
+            console.warn(`Invalid feeling. Choose from: ${allEmotions.join(', ')}`);
         }
     }
 
     /**
      * Edit need and update request
-     * @param {string} newNeed - New need description
+     * @param {string} newNeed - New underlying need
      */
     setNeed(newNeed) {
         this.need = newNeed;
@@ -231,8 +381,12 @@ class NVCFramework {
     }
 
     /**
-     * Get current NVC framework output
-     * @returns {object} - Current state of all NVC components
+     * === OUTPUT METHODS ===
+     */
+
+    /**
+     * Get current NVC output
+     * @returns {object} - {observation, feeling, need, request}
      */
     getOutput() {
         return {
@@ -244,8 +398,8 @@ class NVCFramework {
     }
 
     /**
-     * Get formatted output for display
-     * @returns {object} - Formatted output with all details
+     * Get formatted output with placeholders for empty fields
+     * @returns {object} - Formatted for display
      */
     getFormattedOutput() {
         return {
@@ -257,8 +411,8 @@ class NVCFramework {
     }
 
     /**
-     * Validate all fields are complete
-     * @returns {boolean} - True if all components are present
+     * Check if all components are complete
+     * @returns {boolean} - True if all fields have content
      */
     isComplete() {
         return Boolean(this.observation && this.feeling && this.need && this.request);
@@ -274,45 +428,38 @@ class NVCFramework {
         this.request = '';
         this.originalInput = '';
     }
-}
 
-// Example usage and demonstration
-function demonstrateNVC() {
-    const nvc = new NVCFramework();
-    
-    // Example 1: Basic processing
-    console.log('=== Example 1: Basic NVC Processing ===');
-    const input1 = "I see socks everywhere I'm so angry";
-    const result1 = nvc.process(input1);
-    console.log('Input:', input1);
-    console.log('Output:', result1);
-    console.log('');
-    
-    // Example 2: Editing components
-    console.log('=== Example 2: Editing Components ===');
-    nvc.setObservation('There are socks scattered around the room');
-    console.log('After editing observation:', nvc.getOutput());
-    console.log('');
-    
-    // Example 3: Changing feeling
-    console.log('=== Example 3: Changing Feeling ===');
-    nvc.setFeeling('frustrated');
-    console.log('After changing feeling to frustrated:', nvc.getOutput());
-    console.log('');
-    
-    // Example 4: Different input
-    console.log('=== Example 4: Different Input ===');
-    nvc.reset();
-    const input2 = "You never listen to me when I'm trying to talk, I feel so sad";
-    const result2 = nvc.process(input2);
-    console.log('Input:', input2);
-    console.log('Output:', result2);
-    console.log('');
-    
-    // Example 5: Custom need
-    console.log('=== Example 5: Custom Need ===');
-    nvc.setNeed('understanding / presence');
-    console.log('After custom need:', nvc.getOutput());
+    /**
+     * === DEBUGGING / ANALYSIS METHODS ===
+     * For understanding how the NVC was generated
+     */
+
+    /**
+     * Get analysis of the transformation
+     * Shows what was removed, what was detected, why needs were chosen
+     * @returns {object} - Detailed analysis
+     */
+    getAnalysis() {
+        return {
+            original: this.originalInput,
+            observation: {
+                text: this.observation,
+                methodology: 'Removed judgment words, emotional intensifiers, and interpretations'
+            },
+            feeling: {
+                text: this.feeling,
+                methodology: 'Keyword matching from EMOTION_KEYWORDS database'
+            },
+            need: {
+                text: this.need,
+                reasoning: this.feeling ? `Based on feeling "${this.feeling}" which typically indicates need for ${this.need}` : 'No feeling detected, no need identified'
+            },
+            request: {
+                text: this.request,
+                methodology: 'Generated from observation-specific keywords, then need-based templates'
+            }
+        };
+    }
 }
 
 // Export for use in Node.js or browser

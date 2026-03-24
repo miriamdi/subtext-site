@@ -90,6 +90,9 @@ class SubtextApp {
         this.nvcObservation.addEventListener('input', (e) => this.handleNVCFieldInput(e));
         this.nvcFeeling.addEventListener('input', (e) => this.handleNVCFieldInput(e));
         this.nvcNeed.addEventListener('input', (e) => this.handleNVCFieldInput(e));
+
+        // Initialize explanation and reference features
+        this.initializeExplanationFeatures();
     }
 
     /**
@@ -476,6 +479,327 @@ class SubtextApp {
         this.analyzeBtn.disabled = false;
 
         console.log('App reset');
+    }
+
+    /**
+     * Initialize explanations and reference guide features
+     */
+    initializeExplanationFeatures() {
+        // Initialize reference database
+        this.nvcReference = new NVCReference();
+
+        // Get modal elements
+        this.explanationModal = document.getElementById('explanationModal');
+        this.referenceModal = document.getElementById('referenceModal');
+        this.closeExplanationBtn = document.getElementById('closeExplanation');
+        this.closeReferenceBtn = document.getElementById('closeReference');
+        this.referenceBtn = document.getElementById('referenceBtn');
+
+        // Attach explanation button listeners
+        const explanationBtns = document.querySelectorAll('.explanation-btn');
+        explanationBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const component = btn.getAttribute('data-component');
+                this.showExplanation(component);
+            });
+        });
+
+        // Reference page button
+        if (this.referenceBtn) {
+            this.referenceBtn.addEventListener('click', () => this.showReference());
+        }
+
+        // Close buttons
+        this.closeExplanationBtn.addEventListener('click', () => this.closeExplanation());
+        this.closeReferenceBtn.addEventListener('click', () => this.closeReference());
+
+        // Close on background click
+        this.explanationModal.addEventListener('click', (e) => {
+            if (e.target === this.explanationModal) {
+                this.closeExplanation();
+            }
+        });
+
+        this.referenceModal.addEventListener('click', (e) => {
+            if (e.target === this.referenceModal) {
+                this.closeReference();
+            }
+        });
+
+        // Reference modal tabs
+        const referenceTabBtns = document.querySelectorAll('.reference-tab-btn');
+        referenceTabBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => this.switchReferenceTab(e.target.getAttribute('data-tab')));
+        });
+
+        // Search inputs
+        const feelingsSearch = document.getElementById('feelingsSearch');
+        const needsSearch = document.getElementById('needsSearch');
+
+        if (feelingsSearch) {
+            feelingsSearch.addEventListener('input', (e) => this.filterFeelings(e.target.value));
+        }
+        if (needsSearch) {
+            needsSearch.addEventListener('input', (e) => this.filterNeeds(e.target.value));
+        }
+
+        // Initialize reference content on first load
+        this.renderFeelingsList();
+        this.renderNeedsList();
+
+        console.log('Explanation features initialized');
+    }
+
+    /**
+     * Show explanation modal for a component
+     */
+    showExplanation(component) {
+        const explanation = this.nvcReference.getComponentExplanation(component);
+        if (!explanation) {
+            console.warn('No explanation found for component:', component);
+            return;
+        }
+
+        const explanationContent = document.getElementById('explanationContent');
+        
+        let html = `
+            <div class="explanation-title">
+                <span class="explanation-icon">${explanation.icon}</span>
+                <span>${explanation.title}</span>
+            </div>
+
+            <div class="explanation-section">
+                <p class="section-content">${explanation.description}</p>
+            </div>
+
+            <div class="explanation-section">
+                <div class="section-label">What it means</div>
+                <p class="section-content">${explanation.details}</p>
+            </div>
+
+            <div class="explanation-section">
+                <div class="section-label">Why it matters</div>
+                <p class="section-content">${explanation.why}</p>
+            </div>
+
+            <div class="explanation-section">
+                <div class="example bad">${explanation.example_bad}</div>
+                <div class="example good">${explanation.example_good}</div>
+            </div>
+        `;
+
+        explanationContent.innerHTML = html;
+        
+        this.explanationModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * Close explanation modal
+     */
+    closeExplanation() {
+        this.explanationModal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    /**
+     * Show reference guide modal
+     */
+    showReference() {
+        this.referenceModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * Close reference modal
+     */
+    closeReference() {
+        this.referenceModal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    /**
+     * Switch reference tabs (feelings vs needs)
+     */
+    switchReferenceTab(tabName) {
+        // Hide all sections
+        const sections = document.querySelectorAll('.reference-section');
+        sections.forEach(s => s.classList.remove('active'));
+
+        // Deactivate all tabs
+        const tabs = document.querySelectorAll('.reference-tab-btn');
+        tabs.forEach(t => t.classList.remove('active'));
+
+        // Show selected section
+        const selectedSection = document.getElementById(tabName + 'Tab');
+        if (selectedSection) {
+            selectedSection.classList.add('active');
+        }
+
+        // Activate selected tab
+        const selectedTab = document.querySelector(`[data-tab="${tabName}"]`);
+        if (selectedTab) {
+            selectedTab.classList.add('active');
+        }
+    }
+
+    /**
+     * Render feelings list in reference
+     */
+    renderFeelingsList(feelingsList = null) {
+        const container = document.getElementById('feelingsContainer');
+        if (!container) return;
+
+        const feelings = feelingsList || this.nvcReference.getFeelingsByCategory();
+        let html = '';
+
+        for (const [key, categoryData] of Object.entries(feelings)) {
+            html += `
+                <div class="reference-category">
+                    <div class="category-header">
+                        <div class="category-header-title">${categoryData.title}</div>
+                        <div class="category-header-description">${categoryData.description}</div>
+                    </div>
+                    <div class="category-content">
+                        <div class="entry-list">
+                            ${categoryData.feelings.map(feeling => `
+                                <div class="entry-item">
+                                    <div class="entry-word">${feeling.word}</div>
+                                    <div class="entry-definition">${feeling.definition}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        container.innerHTML = html;
+    }
+
+    /**
+     * Render needs list in reference
+     */
+    renderNeedsList(needsList = null) {
+        const container = document.getElementById('needsContainer');
+        if (!container) return;
+
+        const needs = needsList || this.nvcReference.getNeedsByCategory();
+        let html = '';
+
+        for (const [key, categoryData] of Object.entries(needs)) {
+            html += `
+                <div class="reference-category">
+                    <div class="category-header">
+                        <div class="category-header-icon">${categoryData.icon}</div>
+                        <div>
+                            <div class="category-header-title">${categoryData.category}</div>
+                            <div class="category-header-description">${categoryData.description}</div>
+                        </div>
+                    </div>
+                    <div class="category-content">
+                        <div class="entry-list">
+                            ${categoryData.needs.map(need => `
+                                <div class="entry-item">
+                                    <div class="entry-word">${need.name}</div>
+                                    <div class="entry-definition">${need.definition}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        container.innerHTML = html;
+    }
+
+    /**
+     * Filter feelings list by search term
+     */
+    filterFeelings(searchTerm) {
+        if (!searchTerm.trim()) {
+            this.renderFeelingsList();
+            return;
+        }
+
+        const results = this.nvcReference.searchFeelings(searchTerm);
+        
+        if (results.length === 0) {
+            const container = document.getElementById('feelingsContainer');
+            container.innerHTML = '<p style="color: var(--text-secondary); padding: 2rem; text-align: center;">No feelings found matching "' + searchTerm + '"</p>';
+            return;
+        }
+
+        let html = '';
+        for (const result of results) {
+            html += `
+                <div class="reference-category">
+                    <div class="category-header">
+                        <div class="category-header-title">${result.category}</div>
+                    </div>
+                    <div class="category-content">
+                        <div class="entry-list">
+                            ${result.feelings.map(feeling => `
+                                <div class="entry-item">
+                                    <div class="entry-word">${feeling.word}</div>
+                                    <div class="entry-definition">${feeling.definition}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        const container = document.getElementById('feelingsContainer');
+        container.innerHTML = html;
+    }
+
+    /**
+     * Filter needs list by search term
+     */
+    filterNeeds(searchTerm) {
+        if (!searchTerm.trim()) {
+            this.renderNeedsList();
+            return;
+        }
+
+        const results = this.nvcReference.searchNeeds(searchTerm);
+        
+        if (results.length === 0) {
+            const container = document.getElementById('needsContainer');
+            container.innerHTML = '<p style="color: var(--text-secondary); padding: 2rem; text-align: center;">No needs found matching "' + searchTerm + '"</p>';
+            return;
+        }
+
+        let html = '';
+        for (const result of results) {
+            html += `
+                <div class="reference-category">
+                    <div class="category-header">
+                        <div class="category-header-icon">${result.icon}</div>
+                        <div>
+                            <div class="category-header-title">${result.category}</div>
+                        </div>
+                    </div>
+                    <div class="category-content">
+                        <div class="entry-list">
+                            ${result.needs.map(need => `
+                                <div class="entry-item">
+                                    <div class="entry-word">${need.name}</div>
+                                    <div class="entry-definition">${need.definition}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        const container = document.getElementById('needsContainer');
+        container.innerHTML = html;
     }
 }
 

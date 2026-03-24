@@ -449,7 +449,7 @@ footer {
 
 .nvc-framework {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
 }
 
@@ -595,6 +595,410 @@ footer {
 }
 
 /* =========================
+   Results Header & Reference Button
+   ========================= */
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.results-header h2 {
+    flex: 1;
+    min-width: 200px;
+    margin: 0;
+}
+
+.btn-reference {
+    background: linear-gradient(135deg, var(--warning-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    font-size: 0.95rem;
+    padding: 0.75rem 1.25rem;
+}
+
+.btn-reference:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* =========================
+   NVC Header & Explanation Buttons
+   ========================= */
+
+.nvc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nvc-header h3 {
+    flex: 1;
+    margin: 0;
+}
+
+.explanation-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 50%;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.explanation-btn:hover {
+    background-color: rgba(99, 102, 241, 0.15);
+    transform: scale(1.15);
+}
+
+.explanation-btn:active {
+    transform: scale(1);
+}
+
+.info-icon {
+    display: inline-block;
+}
+
+/* =========================
+   Modals
+   ========================= */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal.open {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.75rem;
+    cursor: pointer;
+    color: var(--text-light);
+    padding: 0.25rem 0.5rem;
+    transition: var(--transition);
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-hover);
+}
+
+/* =========================
+   Explanation Modal
+   ========================= */
+
+.explanation-modal {
+    max-width: 500px;
+}
+
+#explanationContent h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+#explanationContent h2 .icon {
+    font-size: 1.8rem;
+}
+
+#explanationContent .explanation-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+#explanationContent .explanation-icon {
+    font-size: 1.8rem;
+}
+
+#explanationContent .explanation-section {
+    margin-bottom: 1.5rem;
+}
+
+#explanationContent .section-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: var(--text-light);
+}
+
+#explanationContent .section-content {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+#explanationContent .example {
+    padding: 1rem;
+    border-radius: 6px;
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    border-left: 4px solid;
+}
+
+#explanationContent .example.bad {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-left-color: var(--danger-color);
+}
+
+#explanationContent .example.bad::before {
+    content: '❌ Not this: ';
+    font-weight: 600;
+    color: var(--danger-color);
+}
+
+#explanationContent .example.good {
+    background-color: rgba(16, 185, 129, 0.1);
+    border-left-color: var(--success-color);
+}
+
+#explanationContent .example.good::before {
+    content: '✓ Try this: ';
+    font-weight: 600;
+    color: var(--success-color);
+}
+
+/* =========================
+   Reference Page Modal
+   ========================= */
+
+.reference-modal {
+    max-width: 800px;
+    max-height: 85vh;
+}
+
+.reference-modal h2 {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+}
+
+.reference-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.reference-tab-btn {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: var(--transition);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    font-size: 1rem;
+}
+
+.reference-tab-btn:hover {
+    color: var(--primary-color);
+}
+
+.reference-tab-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.reference-content {
+    margin-top: 1rem;
+}
+
+.reference-section {
+    display: none;
+}
+
+.reference-section.active {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+.search-box {
+    margin-bottom: 1.5rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.search-input::placeholder {
+    color: var(--text-light);
+}
+
+/* =========================
+   Reference Categories & Feeling/Need Tables
+   ========================= */
+
+.reference-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.reference-category {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.category-header {
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.category-header-icon {
+    font-size: 1.75rem;
+}
+
+.category-header-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
+.category-header-description {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+.category-content {
+    padding: 1rem;
+}
+
+.entry-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.entry-item {
+    padding: 0.75rem;
+    background: var(--bg-hover);
+    border-radius: 6px;
+    border-left: 3px solid var(--primary-color);
+    transition: var(--transition);
+}
+
+.entry-item:hover {
+    background: rgba(99, 102, 241, 0.1);
+    transform: translateX(4px);
+}
+
+.entry-word {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.entry-definition {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+    line-height: 1.5;
+}
+
+.entry-item:nth-child(2n) {
+    border-left-color: var(--secondary-color);
+}
+
+.entry-item:nth-child(3n) {
+    border-left-color: var(--success-color);
+}
+
+.entry-item:nth-child(4n) {
+    border-left-color: var(--warning-color);
+}
+
+/* =========================
    Responsive Design
    ========================= */
 
@@ -646,6 +1050,46 @@ footer {
 
     .nvc-framework {
         grid-template-columns: 1fr;
+    }
+
+    .results-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .results-header h2 {
+        width: 100%;
+    }
+
+    .btn-reference {
+        width: 100%;
+    }
+
+    .nvc-header {
+        flex-wrap: wrap;
+    }
+
+    .explanation-btn {
+        margin-left: auto;
+    }
+
+    .modal-content {
+        max-width: 95vw;
+        max-height: 95vh;
+        margin: 0 1rem;
+    }
+
+    .reference-modal {
+        max-width: 95vw;
+    }
+
+    .reference-tabs {
+        flex-wrap: wrap;
+    }
+
+    .reference-tab-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
     }
 }
 
