@@ -11,6 +11,8 @@ class SubtextApp {
         this.audioFeatures = null;
         this.emotion = null;
         this.nvcResult = null;
+        this.translationResult = null;
+        this.analyzedText = null; // Text used for analysis (translated if needed)
 
         this.initializeElements();
         this.attachEventListeners();
@@ -29,6 +31,11 @@ class SubtextApp {
 
         // Text input
         this.textInput = document.getElementById('textInput');
+
+        // Translation panel
+        this.translationPanel = document.getElementById('translationPanel');
+        this.detectedLanguage = document.getElementById('detectedLanguage');
+        this.translatedTextDisplay = document.getElementById('translatedTextDisplay');
 
         // Analyze button
         this.analyzeBtn = document.getElementById('analyzeBtn');
@@ -187,8 +194,9 @@ class SubtextApp {
     /**
      * Analyze emotion from audio + text
      */
-    analyzeEmotion() {
+    async analyzeEmotion() {
         const text = this.textInput.value.trim();
+        console.log('[APP-DEBUG] analyzeEmotion called with text:', text);
 
         // Require either audio or text
         if (!this.audioFeatures && text.length === 0) {
@@ -196,16 +204,89 @@ class SubtextApp {
             return;
         }
 
-        // Perform emotion inference
-        this.emotion = emotionInference.inferEmotion(this.audioFeatures, text);
+        // Disable button during processing
+        this.analyzeBtn.disabled = true;
+        this.analyzeBtn.textContent = '⏳ Translating & Analyzing...';
 
-        // Generate NVC response
-        this.nvcResult = nvcAgent.generateNVC(this.emotion, this.audioFeatures, text);
+        try {
+            console.log('[APP-DEBUG] Starting translation process...');
+            
+            // Translate text to English if needed
+            let translationResult;
+            try {
+                translationResult = await translationManager.translateToEnglish(text);
+                console.log('[APP-DEBUG] Translation promise resolved:', translationResult);
+            } catch (translateError) {
+                console.error('[APP-DEBUG] Translation error caught:', translateError);
+                // Fallback: use original text
+                translationResult = {
+                    success: false,
+                    original: text,
+                    translated: text,
+                    language: 'unknown',
+                    isTranslated: false,
+                    error: translateError.message
+                };
+            }
+            
+            this.translationResult = translationResult;
+            this.analyzedText = this.translationResult.translated;
 
-        // Display results
-        this.displayEmotionState();
-        this.displayNVCResults();
-        this.displayClearButton();
+            console.log('[APP-DEBUG] Will analyze text:', this.analyzedText);
+            console.log('[APP-DEBUG] Translation was:', this.translationResult.isTranslated);
+
+            // Display translation if text was translated
+            if (this.translationResult.isTranslated) {
+                this.displayTranslation(this.translationResult);
+            } else {
+                this.translationPanel.style.display = 'none';
+            }
+
+            // Perform emotion inference using the English (translated) text
+            console.log('[APP-DEBUG] Running emotion inference...');
+            this.emotion = emotionInference.inferEmotion(this.audioFeatures, this.analyzedText);
+            console.log('[APP-DEBUG] Emotion result:', this.emotion);
+
+            // Generate NVC response using the English text
+            console.log('[APP-DEBUG] Generating NVC...');
+            this.nvcResult = nvcAgent.generateNVC(this.emotion, this.audioFeatures, this.analyzedText);
+
+            // Display results
+            this.displayEmotionState();
+            this.displayNVCResults();
+            this.displayClearButton();
+        } catch (error) {
+            console.error('[APP-DEBUG] Overall error:', error);
+            alert('Error during analysis. Please try again.');
+        } finally {
+            // Re-enable button
+            this.analyzeBtn.disabled = false;
+            this.analyzeBtn.textContent = '✨ Analyze & Interpret';
+        }
+    }
+
+    /**
+     * Display translation information
+     */
+    displayTranslation(translationResult) {
+        if (!translationResult.isTranslated) {
+            this.translationPanel.style.display = 'none';
+            console.log('[App] No translation needed');
+            return;
+        }
+
+        const langName = translationManager.getLanguageName(translationResult.language);
+        
+        this.detectedLanguage.textContent = langName;
+        this.translatedTextDisplay.textContent = translationResult.translated;
+        this.translationPanel.style.display = 'block';
+
+        console.log('[App] Translation displayed:', {
+            original: translationResult.original,
+            translated: translationResult.translated,
+            language: translationResult.language,
+            languageName: langName
+        });
     }
 
     /**
@@ -273,6 +354,7 @@ class SubtextApp {
         this.featuresPanel.style.display = 'none';
         this.emotionPanel.style.display = 'none';
         this.resultsPanel.style.display = 'none';
+        this.translationPanel.style.display = 'none';
         this.clearSection.style.display = 'none';
         this.recordingComplete.style.display = 'none';
         this.recordingTime.style.display = 'none';
@@ -281,6 +363,8 @@ class SubtextApp {
         this.audioFeatures = null;
         this.emotion = null;
         this.nvcResult = null;
+        this.translationResult = null;
+        this.analyzedText = null;
 
         // Clear speech recognition callback
         audioManager.onTextRecognized = null;

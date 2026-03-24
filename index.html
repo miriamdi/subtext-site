@@ -46,6 +46,24 @@
                 </div>
             </section>
 
+            <!-- Translation Section -->
+            <section class="panel translation-panel" id="translationPanel" style="display:none;">
+                <h2>🌐 Translation Detected</h2>
+                <div class="translation-content">
+                    <div class="translation-detected">
+                        <span class="label">Original Language:</span>
+                        <span class="value" id="detectedLanguage">—</span>
+                    </div>
+                    <div class="translation-box">
+                        <label>Translated to English:</label>
+                        <p id="translatedTextDisplay" class="translation-text">—</p>
+                    </div>
+                    <div class="translation-note">
+                        <small>📝 <em>Analysis will be performed on the English translation</em></small>
+                    </div>
+                </div>
+            </section>
+
             <!-- Analyze Button -->
             <div class="action-section">
                 <button id="analyzeBtn" class="btn btn-analyze">
@@ -156,6 +174,7 @@
     <script src="audio.js"></script>
     <script src="analysis.js"></script>
     <script src="agent.js"></script>
+    <script src="translation.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
