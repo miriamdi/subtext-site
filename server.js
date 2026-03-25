@@ -1,6 +1,6 @@
 // server.js
 const express = require('express');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch'); // Ensure node-fetch is installed: npm install node-fetch@2
 const cors = require('cors');
 
 const app = express();
