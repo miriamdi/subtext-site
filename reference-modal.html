@@ -1,0 +1,23 @@
+<!-- Shared NVC Reference Modal -->
+<div id="referenceModal" class="modal">
+  <div class="modal-content reference-modal-content">
+    <button class="modal-close" id="closeReference" title="Close Reference Guide">&times;</button>
+    <h2>NVC Reference Guide</h2>
+    <div class="reference-tabs">
+      <button class="reference-tab-btn active" data-tab="feelings">Feelings</button>
+      <button class="reference-tab-btn" data-tab="needs">Needs</button>
+    </div>
+    <div class="reference-search">
+      <input type="text" id="feelingsSearch" placeholder="Search" class="reference-search-input search-input">
+      <input type="text" id="needsSearch" placeholder="Search" class="reference-search-input search-input" style="display:none;">
+    </div>
+    <div class="reference-sections">
+      <div class="reference-section active" id="feelingsTab">
+        <div id="feelingsContainer"></div>
+      </div>
+      <div class="reference-section" id="needsTab">
+        <div id="needsContainer"></div>
+      </div>
+    </div>
+  </div>
+</div>

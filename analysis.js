@@ -184,6 +184,42 @@ class EmotionInference {
     inferEmotion(features, text) {
         // Use only audio features if present, fallback to text if not
         let valence = 0, arousal = 0, label = 'Neutral', description = '';
+        // Direct emotion word mapping (text path)
+        const explicitEmotionWords = [
+            { word: 'sad', label: 'Sad' },
+            { word: 'angry', label: 'Angry' },
+            { word: 'happy', label: 'Happy' },
+            { word: 'excited', label: 'Excited' },
+            { word: 'calm', label: 'Calm' },
+            { word: 'anxious', label: 'Anxious' },
+            { word: 'frustrated', label: 'Frustrated' },
+            { word: 'stressed', label: 'Stressed' },
+            { word: 'peaceful', label: 'Peaceful' },
+            { word: 'joy', label: 'Joyful' },
+            { word: 'upset', label: 'Upset' },
+            { word: 'depressed', label: 'Sad' },
+            { word: 'miserable', label: 'Sad' },
+            { word: 'disappointed', label: 'Sad' },
+            { word: 'content', label: 'Content' },
+            { word: 'nervous', label: 'Nervous' },
+            { word: 'tired', label: 'Tired' },
+            { word: 'hopeless', label: 'Sad' },
+            { word: 'afraid', label: 'Afraid' },
+            { word: 'scared', label: 'Afraid' }
+        ];
+        let foundExplicit = null;
+        if (typeof text === 'string' && text.trim().length > 0) {
+            const lowerText = text.toLowerCase();
+            for (const mapping of explicitEmotionWords) {
+                // Match as a word boundary
+                const regex = new RegExp(`\\b${mapping.word}\\b`, 'i');
+                if (regex.test(lowerText)) {
+                    label = mapping.label;
+                    foundExplicit = mapping;
+                    break;
+                }
+            }
+        }
         if (features) {
             // Heuristic rules
             // High energy + high pitch + fast rate → high arousal (excited / anxious)
@@ -238,12 +274,14 @@ class EmotionInference {
             const textArousal = this.sentimentAnalyzer.analyzeEnergy(text);
             valence = textValence;
             arousal = textArousal;
-            // Use text label mapping
-            if (valence > 0.3 && arousal > 0.6) label = 'Excited';
-            else if (valence > 0.3 && arousal <= 0.4) label = 'Calm';
-            else if (valence < -0.3 && arousal > 0.6) label = 'Stressed';
-            else if (valence < -0.3 && arousal <= 0.4) label = 'Sad';
-            else label = 'Neutral';
+            // If explicit emotion word found, use that label
+            if (!foundExplicit) {
+                if (valence > 0.3 && arousal > 0.6) label = 'Excited';
+                else if (valence > 0.3 && arousal <= 0.4) label = 'Calm';
+                else if (valence < -0.3 && arousal > 0.6) label = 'Stressed';
+                else if (valence < -0.3 && arousal <= 0.4) label = 'Sad';
+                else label = 'Neutral';
+            }
         }
         return {
             valence,

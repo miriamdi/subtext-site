@@ -10,7 +10,7 @@
     <div class="container">
         <header>
             <div class="header-nav-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <div></div>
+                <!-- No Open Reference button in header -->
                 <a href="nvc-practice.html" class="nav-link-header" style="color: var(--primary-color); text-decoration: none; font-weight: 600; padding: 0.5rem 1rem; border-radius: 6px; transition: var(--transition); display: inline-flex; align-items: center; gap: 0.5rem;">
                     <span>🎯</span> Practice NVC
                 </a>
@@ -112,6 +112,20 @@
                         </div>
                         <span class="feature-value" id="expressValue">—</span>
                     </div>
+                    <div class="feature-item">
+                        <label>Pause Ratio</label>
+                        <div class="feature-bar">
+                            <div class="feature-fill" id="pauseRatioFill"></div>
+                        </div>
+                        <span class="feature-value" id="pauseRatioValue">—</span>
+                    </div>
+                    <div class="feature-item">
+                        <label>Spectral Centroid</label>
+                        <div class="feature-bar">
+                            <div class="feature-fill" id="spectralCentroidFill"></div>
+                        </div>
+                        <span class="feature-value" id="spectralCentroidValue">—</span>
+                    </div>
                 </div>
             </section>
 
@@ -126,7 +140,6 @@
 
                 <!-- Current Emotion Label Row -->
                 <div class="emotion-label-row">
-                    <span class="label">Current Emotion:</span>
                     <span class="value emotion-label" id="emotionLabel">—</span>
                 </div>
 
@@ -266,40 +279,29 @@
         </div>
     </div>
 
-    <!-- Reference Page Modal -->
-    <div id="referenceModal" class="modal" style="display:none;">
-        <div class="modal-content reference-modal">
-            <button class="modal-close" id="closeReference">×</button>
-            <h2>NVC Reference Guide</h2>
-            
-            <div class="reference-tabs">
-                <button class="reference-tab-btn active" data-tab="feelings">Feelings & Emotions</button>
-                <button class="reference-tab-btn" data-tab="needs">Needs & Values</button>
-            </div>
-
-            <div class="reference-content">
-                <!-- Feelings Tab -->
-                <div id="feelingsTab" class="reference-section active">
-                    <div class="search-box">
-                        <input type="text" id="feelingsSearch" placeholder="Search feelings..." class="search-input">
-                    </div>
-                    <div id="feelingsContainer" class="reference-categories">
-                        <!-- Populated by JS -->
-                    </div>
+        <!-- Shared NVC Reference Modal (restored, static) -->
+        <div id="referenceModal" class="modal">
+            <div class="modal-content reference-modal-content">
+                <span class="close" id="closeReference">&times;</span>
+                <h2>NVC Reference Guide</h2>
+                <div class="reference-tabs">
+                    <button class="reference-tab-btn active" data-tab="feelings">Feelings</button>
+                    <button class="reference-tab-btn" data-tab="needs">Needs</button>
                 </div>
-
-                <!-- Needs Tab -->
-                <div id="needsTab" class="reference-section">
-                    <div class="search-box">
-                        <input type="text" id="needsSearch" placeholder="Search needs..." class="search-input">
+                <div class="reference-search">
+                    <input type="text" id="feelingsSearch" placeholder="Search feelings..." class="reference-search-input">
+                    <input type="text" id="needsSearch" placeholder="Search needs..." class="reference-search-input" style="display:none;">
+                </div>
+                <div class="reference-sections">
+                    <div class="reference-section active" id="feelingsTab">
+                        <div id="feelingsContainer"></div>
                     </div>
-                    <div id="needsContainer" class="reference-categories">
-                        <!-- Populated by JS -->
+                    <div class="reference-section" id="needsTab">
+                        <div id="needsContainer"></div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Scripts -->
     <script src="audio.js"></script>
@@ -311,77 +313,44 @@
     <script src="reference.js"></script>
     <script src="emotion-utils.js"></script>
     <script src="app.js"></script>
-        <!-- Audio Recording and Feature Extraction Integration -->
         <script>
-        // --- Modern Audio Recording and Feature Extraction Integration ---
-        let mediaRecorder, audioChunks = [];
-        const recordBtn = document.getElementById('recordBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const recordingStatus = document.getElementById('recordingStatus');
-        const recordingComplete = document.getElementById('recordingComplete');
-        let lastAudioBlob = null;
+        // Reference modal open/close logic for main page only
+        // Ensure modal only opens when the button is clicked
 
-        if (recordBtn && stopBtn) {
-            recordBtn.onclick = () => {
-                audioChunks = [];
-                navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-                    mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                    mediaRecorder.onstop = () => {
-                        lastAudioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        recordingStatus.style.display = 'none';
-                        recordingComplete.style.display = 'block';
-                    };
-                    mediaRecorder.start();
-                    recordBtn.disabled = true;
-                    stopBtn.disabled = false;
-                    recordingStatus.style.display = 'flex';
-                    recordingComplete.style.display = 'none';
-                }).catch(err => {
-                    alert('Microphone error: ' + err);
+        document.addEventListener('DOMContentLoaded', function() {
+            const referenceBtn = document.getElementById('referenceBtn');
+            const referenceModal = document.getElementById('referenceModal');
+            const closeReferenceBtn = document.getElementById('closeReference');
+
+            if (referenceBtn && referenceModal) {
+                referenceBtn.addEventListener('click', () => {
+                    referenceModal.style.display = 'flex';
+                    // Default to Feelings tab
+                    const tabBtn = referenceModal.querySelector('.reference-tab-btn[data-tab="feelings"]');
+                    if (tabBtn) tabBtn.click();
                 });
-            };
-            stopBtn.onclick = () => {
-                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                    mediaRecorder.stop();
-                    recordBtn.disabled = false;
-                    stopBtn.disabled = true;
-                }
-            };
-        }
+            }
 
-        // --- Analyze Button: Send WAV to Flask and integrate features ---
-        if (analyzeBtn) {
-            analyzeBtn.addEventListener('click', () => {
-                if (!lastAudioBlob) {
-                    alert('Please record audio before analyzing.');
-                    return;
-                }
-                const formData = new FormData();
-                formData.append('audio', lastAudioBlob, 'recording.wav');
-                fetch('http://localhost:5000/extract_features', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(res => {
-                    if (!res.ok) throw new Error('Server error: ' + res.status);
-                    return res.json();
-                })
-                .then(features => {
-                    // Integrate with your pipeline here
-                    if (typeof analyzeEmotionWithFeatures === 'function') {
-                        analyzeEmotionWithFeatures(features);
-                    } else {
-                        console.log('Extracted features:', features);
-                        alert('Features extracted! Check console.');
+            if (closeReferenceBtn && referenceModal) {
+                closeReferenceBtn.addEventListener('click', () => {
+                    referenceModal.style.display = 'none';
+                });
+                referenceModal.addEventListener('click', (e) => {
+                    if (e.target === referenceModal) {
+                        referenceModal.style.display = 'none';
                     }
-                })
-                .catch(err => {
-                    alert('Error extracting features: ' + err);
                 });
-            });
-        }
+            }
+
+            // Ensure no automatic modal display
+            if (referenceModal) {
+                referenceModal.style.display = 'none';
+            }
+
+            if (typeof initializeReferenceModalFeatures === 'function') {
+                initializeReferenceModalFeatures();
+            }
+        });
         </script>
 </body>
 </html>

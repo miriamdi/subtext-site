@@ -73,6 +73,10 @@ class SubtextApp {
         this.rateValue = document.getElementById('rateValue');
         this.expressFill = document.getElementById('expressFill');
         this.expressValue = document.getElementById('expressValue');
+        this.pauseRatioFill = document.getElementById('pauseRatioFill');
+        this.pauseRatioValue = document.getElementById('pauseRatioValue');
+        this.spectralCentroidFill = document.getElementById('spectralCentroidFill');
+        this.spectralCentroidValue = document.getElementById('spectralCentroidValue');
 
         // Emotion panel
         this.emotionPanel = document.getElementById('emotionPanel');
@@ -165,6 +169,10 @@ class SubtextApp {
 
         // Initialize explanation and reference features
         this.initializeExplanationFeatures();
+        // Also initialize reference modal features for main page
+        if (typeof initializeReferenceModalFeatures === 'function') {
+            initializeReferenceModalFeatures();
+        }
         this.initializeInteractiveReferenceGuide();
         this.initializeEmotionInfoModal();
     }
@@ -278,10 +286,16 @@ class SubtextApp {
         this.rateFill.style.width = (norm.speechRate * 100) + '%';
         this.rateValue.textContent = (norm.speechRate * 100).toFixed(0) + '%';
         // Pause Ratio
+        if (this.pauseRatioFill) {
+            this.pauseRatioFill.style.width = (norm.pauseRatio * 100) + '%';
+        }
         if (this.pauseRatioValue) {
             this.pauseRatioValue.textContent = (norm.pauseRatio * 100).toFixed(0) + '%';
         }
         // Spectral Centroid
+        if (this.spectralCentroidFill) {
+            this.spectralCentroidFill.style.width = (norm.spectralCentroid * 100) + '%';
+        }
         if (this.spectralCentroidValue) {
             this.spectralCentroidValue.textContent = (norm.spectralCentroid * 100).toFixed(0) + '%';
         }
@@ -406,8 +420,8 @@ class SubtextApp {
         const y = 150 - (arousal * 150); // arousal: 0 to 1 → 150 to 0 (inverted for display)
         this.emotionPoint.style.left = x + 'px';
         this.emotionPoint.style.top = y + 'px';
-        // Display emotion label and description
-        this.emotionLabel.textContent = `Emotional state: ${label} (${description})`;
+        // Display only the emotion label as 'Current Emotion: <label>'
+        this.emotionLabel.textContent = `Current Emotion: ${label}`;
         // Display values
         const valenceLabel = valence > 0 ? 'Positive' : valence < 0 ? 'Negative' : 'Neutral';
         const arousalLabel = arousal > 0.6 ? 'High Energy' : arousal < 0.4 ? 'Low Energy' : 'Balanced';

@@ -14,19 +14,9 @@ class NVCPractice {
         this.nvcReference = new NVCReference();
         this.initializeElements();
         this.attachEventListeners();
-        this.initializeReferenceModalFromApp();
+        // No reference modal initialization in practice page
     }
-    // Use the same initialization as the main page for the reference modal
-    initializeReferenceModalFromApp() {
-        if (window.SubtextApp && typeof window.SubtextApp === 'function') {
-            // If the main app logic is available, use its reference modal logic
-            // (This is a fallback for future-proofing, but not strictly needed)
-            return;
-        }
-        // Otherwise, mimic the main page's initialization
-        // This assumes reference.js and its logic are loaded and will populate the modal
-        // No custom rendering here; let reference.js/app.js handle it
-    }
+    // No reference modal logic in practice page
 
     /**
      * Initialize DOM element references
@@ -209,16 +199,14 @@ class NVCPractice {
     /**
      * Call Hugging Face free inference API
      */
-    async callHuggingFace(prompt) {
-        // Always build the prompt string (in case prompt is just user text)
-        const fullPrompt = this.buildNVCPrompt(prompt);
+    async callHuggingFace(userText) {
         // Use your deployed proxy server URL in production
         const url = 'https://subtext-je6y.onrender.com/chat'; // or 'http://localhost:5000/chat' for local dev
         try {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: fullPrompt })
+                body: JSON.stringify({ message: userText })
             });
             if (!response.ok) throw new Error('Proxy server error');
             const data = await response.json();

@@ -1,3 +1,82 @@
+// Programmatically open the reference guide and select a feeling/need
+// Usage: openReferenceGuide('feelings', 'happy') or openReferenceGuide('needs', 'connection')
+window.openReferenceGuide = function(tab, word) {
+    const referenceModal = document.getElementById('referenceModal');
+    const referenceTabBtns = document.querySelectorAll('.reference-tab-btn');
+    const sections = document.querySelectorAll('.reference-section');
+    // Open modal
+    referenceModal.style.display = 'flex';
+    // Switch tab
+    referenceTabBtns.forEach(btn => {
+        if (btn.getAttribute('data-tab') === tab) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    sections.forEach(sec => {
+        if (sec.id === tab + 'Tab') {
+            sec.classList.add('active');
+        } else {
+            sec.classList.remove('active');
+        }
+    });
+    // Highlight the word if provided
+    if (word) {
+        setTimeout(() => {
+            let selector = '';
+            if (tab === 'feelings') {
+                selector = `#feelingsContainer [data-selectable][data-word='${word.toLowerCase()}']`;
+            } else if (tab === 'needs') {
+                selector = `#needsContainer [data-selectable][data-word='${word.toLowerCase()}']`;
+            }
+            const el = document.querySelector(selector);
+            if (el) {
+                el.classList.add('selected-reference-item');
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Remove highlight after a short time
+                setTimeout(() => el.classList.remove('selected-reference-item'), 2000);
+            }
+        }, 200); // Wait for DOM to update if needed
+    }
+};
+// Shared initialization for the reference modal (tabs, close, search, etc.)
+function initializeReferenceModalFeatures() {
+    const referenceModal = document.getElementById('referenceModal');
+    const closeReferenceBtn = document.getElementById('closeReference');
+    const referenceTabBtns = document.querySelectorAll('.reference-tab-btn');
+    const feelingsSearch = document.getElementById('feelingsSearch');
+    const needsSearch = document.getElementById('needsSearch');
+
+    // Tab switching
+    referenceTabBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Remove active from all
+            referenceTabBtns.forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.reference-section').forEach(sec => sec.classList.remove('active'));
+            // Add active to selected
+            btn.classList.add('active');
+            const tab = btn.getAttribute('data-tab');
+            document.getElementById(tab + 'Tab').classList.add('active');
+        });
+    });
+
+    // Close modal
+    if (closeReferenceBtn && referenceModal) {
+        closeReferenceBtn.addEventListener('click', () => {
+            referenceModal.style.display = 'none';
+        });
+        referenceModal.addEventListener('click', (e) => {
+            if (e.target === referenceModal) {
+                referenceModal.style.display = 'none';
+            }
+        });
+    }
+
+    // Search inputs (optional: add filtering logic here if needed)
+    // ...
+}
+// No dynamic injection; modal is present in main page only
 /**
  * reference.js
  * NVC Reference Database
