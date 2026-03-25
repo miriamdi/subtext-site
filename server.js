@@ -9,21 +9,34 @@ app.use(express.json());
 
 const HF_TOKEN = process.env.HF_API_KEY; 
 
+
 app.post('/chat', async (req, res) => {
-  const { message } = req.body;
+  // Log every incoming request body
+  console.log('[POST /chat] Incoming request body:', req.body);
   try {
-    const hfRes = await fetch('https://api-inference.huggingface.co/models/google/flan-t5-large', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${HF_TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ inputs: message })
-    });
-    const data = await hfRes.json();
+    const { message } = req.body;
+    let hfRes, data;
+    try {
+      hfRes = await fetch('https://api-inference.huggingface.co/models/google/flan-t5-large', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${HF_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ inputs: message })
+      });
+      data = await hfRes.json();
+      // Log Hugging Face response
+      console.log('[POST /chat] Hugging Face response:', data);
+    } catch (hfError) {
+      console.error('[POST /chat] Error calling Hugging Face:', hfError);
+      return res.status(500).json({ error: 'Hugging Face request failed', details: hfError.message });
+    }
     res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: 'Hugging Face request failed', details: err.message });
+  } catch (error) {
+    // Log any other errors
+    console.error('[POST /chat] Handler error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
