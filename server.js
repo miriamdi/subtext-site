@@ -17,13 +17,25 @@ app.post('/chat', async (req, res) => {
     const { message } = req.body;
     let hfRes, data;
     try {
-      hfRes = await fetch('https://api-inference.huggingface.co/models/google/flan-t5-large', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${HF_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ inputs: message })
+      const systemPrompt = `You are an NVC (Nonviolent Communication) coach.
+      1. Identify:
+      Observation:
+      Feeling:
+      Need:
+      Request:
+      2. If missing elements, explain what’s missing.
+      3. Suggest a better NVC phrasing.
+      4. Respond briefly and clearly.`;
+
+      const fullPrompt = `${systemPrompt}\nUser said: "${message}"`;
+
+      hfRes = await fetch('https://router.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2', { // updated endpoint
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${HF_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ inputs: fullPrompt }) // <-- build full prompt here
       });
       data = await hfRes.json();
       // Log Hugging Face response
