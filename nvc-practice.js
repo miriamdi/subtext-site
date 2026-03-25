@@ -10,9 +10,22 @@ class NVCPractice {
         this.currentResult = null;
         this.apiKey = null; // Will try free options first
         this.chatHistory = [];
-        
+
+        this.nvcReference = new NVCReference();
         this.initializeElements();
         this.attachEventListeners();
+        this.initializeReferenceModalFromApp();
+    }
+    // Use the same initialization as the main page for the reference modal
+    initializeReferenceModalFromApp() {
+        if (window.SubtextApp && typeof window.SubtextApp === 'function') {
+            // If the main app logic is available, use its reference modal logic
+            // (This is a fallback for future-proofing, but not strictly needed)
+            return;
+        }
+        // Otherwise, mimic the main page's initialization
+        // This assumes reference.js and its logic are loaded and will populate the modal
+        // No custom rendering here; let reference.js/app.js handle it
     }
 
     /**
