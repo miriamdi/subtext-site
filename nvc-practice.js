@@ -213,7 +213,7 @@ class NVCPractice {
         // Always build the prompt string (in case prompt is just user text)
         const fullPrompt = this.buildNVCPrompt(prompt);
         // Use your deployed proxy server URL in production
-        const url = 'https://your-proxy-server.com/chat'; // or 'http://localhost:5000/chat' for local dev
+        const url = 'https://subtext-je6y.onrender.com/chat'; // or 'http://localhost:5000/chat' for local dev
         try {
             const response = await fetch(url, {
                 method: 'POST',
