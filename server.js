@@ -23,48 +23,25 @@ const HF_MODEL_NAME = process.env.HF_MODEL_NAME || 'mistralai/Mistral-7B-Instruc
 async function callHuggingFaceNVC(text) {
   const prompt = `You are an expert in Nonviolent Communication (NVC).\n\nYour task is to transform user input into 4 components:\n1. observation (objective, factual, no judgment)\n2. feeling (one word emotion)\n3. need (universal human need, not an action)\n4. request (specific, actionable, phrased as a question)\n\nRules:\n- Observation must be neutral (no blame, no \"I feel\")\n- Feeling must be one word\n- Need must be universal\n- Request must be concrete and doable\n- If no request is appropriate, return \"\"\n\nReturn ONLY valid JSON:\n{\n  \"observation\": \"...\",\n  \"feeling\": \"...\",\n  \"need\": \"...\",\n  \"request\": \"...\"\n}\n\nNow process this input:\n---\n${text}\n---`;
 
-  const routerApiTextGen = 'https://router.huggingface.co/api/text-generation';
-  const routerApiChat = 'https://router.huggingface.co/api/chat';
+  const hfInferenceEndpoint = `https://router.huggingface.co/hf-inference/models/${HF_MODEL_NAME}`;
 
   let response;
   try {
-    response = await fetch(routerApiTextGen, {
+    response = await fetch(hfInferenceEndpoint, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${HF_TOKEN}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: HF_MODEL_NAME,
         inputs: prompt,
         parameters: {
           temperature: 0.2,
-          max_new_tokens: 200
+          max_new_tokens: 200,
+          return_full_text: false
         }
       })
     });
-
-    // If text-generation route isn't supported, fallback to chat route
-    if (response.status === 404 || response.status === 405 || response.status === 410) {
-      const errorText = await response.text();
-      console.warn('callHuggingFaceNVC: text-generation route bad status, trying chat route', response.status, errorText);
-      response = await fetch(routerApiChat, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${HF_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: HF_MODEL_NAME,
-          messages: [
-            { role: 'system', content: 'You are an expert in Nonviolent Communication (NVC).' },
-            { role: 'user', content: prompt }
-          ],
-          temperature: 0.2,
-          max_new_tokens: 200
-        })
-      });
-    }
   } catch (err) {
     throw new Error('HF request error: ' + err.message);
   }
